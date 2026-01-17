@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fonctions Super-Pouvoir - Le Chat</title>
+  <link rel="stylesheet" href="../shared/css/glassui.css">
+  <link rel="stylesheet" href="../shared/css/common.css">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- CodeMirror -->
+  <link rel="stylesheet" href="../shared/css/codemirror/codemirror.css">
+  <link rel="stylesheet" href="../shared/css/codemirror/theme/monokai.css">
+  <script src="../shared/js/codemirror/codemirror.js"></script>
+  <script src="../shared/js/codemirror/mode/javascript.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="terminal-panel glass-panel">
+      <h2 style="margin-bottom: 16px; color: var(--text-primary);">Terminal</h2>
+      <div id="code-editor"></div>
+      <button id="execute-btn" class="glass-button primary">Exécuter</button>
+      <div id="output" class="glass-panel" style="margin-top: 16px; padding: 16px;"></div>
+    </div>
+    <div class="game-panel glass-panel">
+      <h2 style="margin-bottom: 16px; color: var(--text-primary);">Le Chat</h2>
+      <canvas id="game-canvas" width="600" height="600"></canvas>
+      <button id="draw-cat-btn" class="glass-button primary" style="margin-top: 16px; width: 100%;">Dessiner le Chat</button>
+    </div>
+  </div>
+  <script type="text/plain" id="game-code">
+// Fonctions Super-Pouvoir - Dessiner un Chat
+// Utilisez des fonctions pour dessiner chaque partie du chat
+
+const canvas = document.getElementById('game-canvas');
+const ctx = canvas.getContext('2d');
+const drawCatBtn = document.getElementById('draw-cat-btn');
+
+// Fonction pour dessiner la tête
+function dessinerTete(x, y, taille) {
+  ctx.fillStyle = '#ffa500';
+  ctx.beginPath();
+  ctx.arc(x, y, taille, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  console.log(`Tête dessinée à (${x}, ${y})`);
+}
+
+// Fonction pour dessiner les oreilles
+function dessinerOreilles(x, y, taille) {
+  ctx.fillStyle = '#ffa500';
+  // Oreille gauche
+  ctx.beginPath();
+  ctx.moveTo(x - taille * 0.6, y - taille * 0.8);
+  ctx.lineTo(x - taille * 0.3, y - taille * 1.3);
+  ctx.lineTo(x - taille * 0.1, y - taille * 0.9);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  
+  // Oreille droite
+  ctx.beginPath();
+  ctx.moveTo(x + taille * 0.6, y - taille * 0.8);
+  ctx.lineTo(x + taille * 0.3, y - taille * 1.3);
+  ctx.lineTo(x + taille * 0.1, y - taille * 0.9);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  console.log('Oreilles dessinées');
+}
+
+// Fonction pour dessiner les yeux
+function dessinerYeux(x, y, taille) {
+  // Œil gauche
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.arc(x - taille * 0.3, y - taille * 0.2, taille * 0.15, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#000';
+  ctx.beginPath();
+  ctx.arc(x - taille * 0.3, y - taille * 0.2, taille * 0.08, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Œil droit
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.arc(x + taille * 0.3, y - taille * 0.2, taille * 0.15, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#000';
+  ctx.beginPath();
+  ctx.arc(x + taille * 0.3, y - taille * 0.2, taille * 0.08, 0, Math.PI * 2);
+  ctx.fill();
+  console.log('Yeux dessinés');
+}
+
+// Fonction pour dessiner le nez
+function dessinerNez(x, y, taille) {
+  ctx.fillStyle = '#ff69b4';
+  ctx.beginPath();
+  ctx.moveTo(x, y + taille * 0.1);
+  ctx.lineTo(x - taille * 0.1, y + taille * 0.3);
+  ctx.lineTo(x + taille * 0.1, y + taille * 0.3);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  console.log('Nez dessiné');
+}
+
+// Fonction pour dessiner la bouche
+function dessinerBouche(x, y, taille) {
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(x, y + taille * 0.3);
+  ctx.lineTo(x - taille * 0.2, y + taille * 0.5);
+  ctx.moveTo(x, y + taille * 0.3);
+  ctx.lineTo(x + taille * 0.2, y + taille * 0.5);
+  ctx.stroke();
+  console.log('Bouche dessinée');
+}
+
+// Fonction pour dessiner le corps
+function dessinerCorps(x, y, taille) {
+  ctx.fillStyle = '#ffa500';
+  ctx.beginPath();
+  ctx.ellipse(x, y + taille * 1.5, taille * 0.8, taille * 1.2, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  console.log('Corps dessiné');
+}
+
+// Fonction pour dessiner les pattes
+function dessinerPattes(x, y, taille) {
+  ctx.fillStyle = '#ffa500';
+  const largeurPatte = taille * 0.15;
+  const hauteurPatte = taille * 0.6;
+  
+  // Patte avant gauche
+  ctx.fillRect(x - taille * 0.6, y + taille * 1.2, largeurPatte, hauteurPatte);
+  ctx.strokeRect(x - taille * 0.6, y + taille * 1.2, largeurPatte, hauteurPatte);
+  
+  // Patte avant droite
+  ctx.fillRect(x + taille * 0.45, y + taille * 1.2, largeurPatte, hauteurPatte);
+  ctx.strokeRect(x + taille * 0.45, y + taille * 1.2, largeurPatte, hauteurPatte);
+  
+  // Patte arrière gauche
+  ctx.fillRect(x - taille * 0.5, y + taille * 2.2, largeurPatte, hauteurPatte);
+  ctx.strokeRect(x - taille * 0.5, y + taille * 2.2, largeurPatte, hauteurPatte);
+  
+  // Patte arrière droite
+  ctx.fillRect(x + taille * 0.35, y + taille * 2.2, largeurPatte, hauteurPatte);
+  ctx.strokeRect(x + taille * 0.35, y + taille * 2.2, largeurPatte, hauteurPatte);
+  console.log('Pattes dessinées');
+}
+
+// Fonction pour dessiner la queue
+function dessinerQueue(x, y, taille) {
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = taille * 0.2;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(x + taille * 0.8, y + taille * 1.5);
+  ctx.quadraticCurveTo(x + taille * 1.5, y + taille * 0.5, x + taille * 1.8, y + taille * 1.2);
+  ctx.stroke();
+  console.log('Queue dessinée');
+}
+
+// Fonction principale pour dessiner le chat complet
+function dessinerChat() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  const centreX = canvas.width / 2;
+  const centreY = canvas.height / 2 - 50;
+  const taille = 80;
+  
+  dessinerCorps(centreX, centreY, taille);
+  dessinerTete(centreX, centreY - taille * 0.5, taille);
+  dessinerOreilles(centreX, centreY - taille * 0.5, taille);
+  dessinerYeux(centreX, centreY - taille * 0.5, taille);
+  dessinerNez(centreX, centreY - taille * 0.5, taille);
+  dessinerBouche(centreX, centreY - taille * 0.5, taille);
+  dessinerPattes(centreX, centreY - taille * 0.5, taille);
+  dessinerQueue(centreX, centreY - taille * 0.5, taille);
+  
+  console.log('Chat complet dessiné!');
+}
+
+// Bouton pour dessiner le chat
+drawCatBtn.addEventListener('click', () => {
+  dessinerChat();
+});
+
+// Initialisation
+console.log('=== Fonctions Super-Pouvoir - Le Chat ===');
+console.log('');
+console.log('Fonctions disponibles:');
+console.log('  - dessinerTete(x, y, taille)');
+console.log('  - dessinerOreilles(x, y, taille)');
+console.log('  - dessinerYeux(x, y, taille)');
+console.log('  - dessinerNez(x, y, taille)');
+console.log('  - dessinerBouche(x, y, taille)');
+console.log('  - dessinerCorps(x, y, taille)');
+console.log('  - dessinerPattes(x, y, taille)');
+console.log('  - dessinerQueue(x, y, taille)');
+console.log('  - dessinerChat(): Dessine le chat complet');
+console.log('');
+console.log('Exemple:');
+console.log('  dessinerChat();');
+  </script>
+  <script src="../shared/js/terminal.js"></script>
+  <script>
+    const gameJsPath = 'js/game.js';
+    document.addEventListener('DOMContentLoaded', () => {
+      const codeEditor = document.getElementById('code-editor');
+      const executeBtn = document.getElementById('execute-btn');
+      const output = document.getElementById('output');
+      if (codeEditor && executeBtn && output) {
+        window.terminal = new Terminal('code-editor', 'execute-btn', 'output', gameJsPath);
+      }
+    });
+  </script>
+</body>
+</html>

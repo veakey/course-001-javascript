@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>L'inventaire - Variables et Types de Données</title>
+  <link rel="stylesheet" href="../shared/css/glassui.css">
+  <link rel="stylesheet" href="../shared/css/common.css">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- CodeMirror -->
+  <link rel="stylesheet" href="../shared/css/codemirror/codemirror.css">
+  <link rel="stylesheet" href="../shared/css/codemirror/theme/monokai.css">
+  <script src="../shared/js/codemirror/codemirror.js"></script>
+  <script src="../shared/js/codemirror/mode/javascript.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="terminal-panel glass-panel">
+      <h2 style="margin-bottom: 16px; color: var(--text-primary);">Terminal</h2>
+      <div id="code-editor"></div>
+      <button id="execute-btn" class="glass-button primary">Exécuter</button>
+      <div id="output" class="glass-panel" style="margin-top: 16px; padding: 16px;"></div>
+    </div>
+    <div class="game-panel glass-panel">
+      <h2 style="margin-bottom: 16px; color: var(--text-primary);">Inventaire</h2>
+      <div id="inventory" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 16px; padding: 16px;"></div>
+    </div>
+  </div>
+  <script type="text/plain" id="game-code">
+// L'inventaire - Variables et Types de Données
+// Déclarez des variables pour remplir votre inventaire
+
+const inventoryDiv = document.getElementById('inventory');
+
+// Inventaire global
+let inventaire = [];
+
+// Fonction pour ajouter un item à l'inventaire
+function ajouterItem(nom, type, quantite = 1) {
+  const item = {
+    nom: String(nom),
+    type: String(type),
+    quantite: Number(quantite)
+  };
+  inventaire.push(item);
+  afficherInventaire();
+  console.log(`Item ajouté: ${item.nom} (${item.type}) x${item.quantite}`);
+}
+
+// Fonction pour afficher l'inventaire
+function afficherInventaire() {
+  inventoryDiv.innerHTML = '';
+  
+  if (inventaire.length === 0) {
+    inventoryDiv.innerHTML = '<p style="color: var(--text-secondary); grid-column: 1 / -1; text-align: center;">Inventaire vide</p>';
+    return;
+  }
+  
+  inventaire.forEach((item, index) => {
+    const itemDiv = document.createElement('div');
+    itemDiv.className = 'inventory-item';
+    itemDiv.innerHTML = `
+      <div class="item-name">${item.nom}</div>
+      <div class="item-type">Type: ${item.type}</div>
+      <div class="item-quantity">Quantité: ${item.quantite}</div>
+    `;
+    inventoryDiv.appendChild(itemDiv);
+  });
+}
+
+// Exemples de variables
+let nomJoueur = "Aventurier";
+let niveau = 5;
+let or = 100;
+let estVivant = true;
+
+// Exemple d'utilisation
+console.log('Variables déclarées:');
+console.log('nomJoueur:', nomJoueur, '(string)');
+console.log('niveau:', niveau, '(number)');
+console.log('or:', or, '(number)');
+console.log('estVivant:', estVivant, '(boolean)');
+console.log('');
+console.log('Utilisez ajouterItem(nom, type, quantite) pour ajouter des items à l\'inventaire');
+console.log('Exemple: ajouterItem("Épée", "Arme", 1)');
+
+// Initialisation
+afficherInventaire();
+  </script>
+  <script src="../shared/js/terminal.js"></script>
+  <script>
+    const gameJsPath = 'js/game.js';
+    document.addEventListener('DOMContentLoaded', () => {
+      const codeEditor = document.getElementById('code-editor');
+      const executeBtn = document.getElementById('execute-btn');
+      const output = document.getElementById('output');
+      if (codeEditor && executeBtn && output) {
+        window.terminal = new Terminal('code-editor', 'execute-btn', 'output', gameJsPath);
+      }
+    });
+  </script>
+</body>
+</html>

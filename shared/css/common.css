@@ -1,0 +1,191 @@
+/* Styles communs - Layout 2 colonnes, terminal, responsive */
+
+.container {
+  display: flex;
+  gap: 24px;
+  padding: 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+.terminal-panel {
+  flex: 0 0 45%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.game-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+#code-editor {
+  width: 100%;
+  min-height: 400px;
+  resize: vertical;
+  font-family: 'Courier New', 'Consolas', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  tab-size: 2;
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: auto;
+}
+
+/* CodeMirror Styles - Adaptation pour thème dark avec fond glassui */
+.CodeMirror {
+  height: auto;
+  min-height: 400px;
+  font-family: 'Courier New', 'Consolas', 'Monaco', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  /* Le fond sera géré par le thème monokai, mais on ajoute un peu de transparence pour l'effet glass */
+}
+
+/* Ajustement du thème monokai pour s'intégrer avec glassui */
+.CodeMirror.cm-s-monokai {
+  background: rgba(39, 40, 34, 0.85) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.CodeMirror-scroll {
+  min-height: 400px;
+}
+
+/* Les styles des gutters, cursor et sélection sont gérés par le thème monokai */
+
+/* Les styles de coloration sont gérés par le thème monokai */
+
+/* CodeMirror Scrollbar */
+.CodeMirror-scrollbar-filler {
+  background: transparent;
+}
+
+.CodeMirror-vscrollbar,
+.CodeMirror-hscrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.CodeMirror-vscrollbar::-webkit-scrollbar,
+.CodeMirror-hscrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.CodeMirror-vscrollbar::-webkit-scrollbar-track,
+.CodeMirror-hscrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.CodeMirror-vscrollbar::-webkit-scrollbar-thumb,
+.CodeMirror-hscrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.CodeMirror-vscrollbar::-webkit-scrollbar-thumb:hover,
+.CodeMirror-hscrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+#execute-btn {
+  align-self: flex-start;
+  min-width: 120px;
+}
+
+#output {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 16px;
+  min-height: 100px;
+  max-height: 200px;
+  overflow-y: auto;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+#output.error {
+  color: #ff6b6b;
+  border-color: rgba(255, 107, 107, 0.3);
+}
+
+#output.success {
+  color: #51cf66;
+  border-color: rgba(81, 207, 102, 0.3);
+}
+
+#output.info {
+  color: #4dabf7;
+  border-color: rgba(77, 171, 247, 0.3);
+}
+
+/* Scrollbar personnalisée */
+#output::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+#output::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+#output::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+#output::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .container {
+    flex-direction: column;
+    padding: 16px;
+  }
+
+  .terminal-panel {
+    flex: 1;
+  }
+
+  .game-panel {
+    flex: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 12px;
+    gap: 16px;
+  }
+
+  #code-editor {
+    min-height: 300px;
+  }
+
+  .CodeMirror {
+    min-height: 300px;
+    font-size: 12px;
+  }
+
+  .glass-panel {
+    padding: 16px;
+  }
+}

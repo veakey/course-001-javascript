@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Événements - Chasse au Trésor</title>
+  <link rel="stylesheet" href="../shared/css/glassui.css">
+  <link rel="stylesheet" href="../shared/css/common.css">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- CodeMirror -->
+  <link rel="stylesheet" href="../shared/css/codemirror/codemirror.css">
+  <link rel="stylesheet" href="../shared/css/codemirror/theme/monokai.css">
+  <script src="../shared/js/codemirror/codemirror.js"></script>
+  <script src="../shared/js/codemirror/mode/javascript.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="terminal-panel glass-panel">
+      <h2 style="margin-bottom: 16px; color: var(--text-primary);">Terminal</h2>
+      <div id="code-editor"></div>
+      <button id="execute-btn" class="glass-button primary">Exécuter</button>
+      <div id="output" class="glass-panel" style="margin-top: 16px; padding: 16px;"></div>
+    </div>
+    <div class="game-panel glass-panel">
+      <h2 style="margin-bottom: 16px; color: var(--text-primary);">Chasse au Trésor</h2>
+      <canvas id="game-canvas" width="600" height="600"></canvas>
+      <div id="feedback" style="text-align: center; margin-top: 16px; padding: 12px; background: rgba(0, 0, 0, 0.2); border-radius: 8px; min-height: 40px; display: flex; align-items: center; justify-content: center;">
+        <p style="color: var(--text-secondary);">Cliquez sur la carte pour chercher le trésor!</p>
+      </div>
+      <button id="new-game-btn" class="glass-button" style="margin-top: 16px; width: 100%;">Nouvelle Partie</button>
+    </div>
+  </div>
+  <script type="text/plain" id="game-code">
+// Événements - Chasse au Trésor
+// Cliquez sur la carte pour trouver le trésor avec des indices de température
+
+const canvas = document.getElementById('game-canvas');
+const ctx = canvas.getContext('2d');
+const feedbackDiv = document.getElementById('feedback');
+const newGameBtn = document.getElementById('new-game-btn');
+
+// État du jeu
+let tresorX = 0;
+let tresorY = 0;
+let partieEnCours = false;
+let tentatives = 0;
+
+// Fonction pour démarrer une nouvelle partie
+function nouvellePartie() {
+  tresorX = Math.random() * (canvas.width - 40) + 20;
+  tresorY = Math.random() * (canvas.height - 40) + 20;
+  partieEnCours = true;
+  tentatives = 0;
+  dessinerCarte();
+  afficherFeedback('Cliquez sur la carte pour chercher le trésor!');
+  console.log('Nouvelle partie démarrée! Le trésor est caché quelque part...');
+}
+
+// Fonction pour calculer la distance
+function calculerDistance(x1, y1, x2, y2) {
+  return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+}
+
+// Fonction pour obtenir le feedback selon la distance
+function obtenirFeedback(distance) {
+  const maxDistance = Math.sqrt(canvas.width ** 2 + canvas.height ** 2);
+  const pourcentage = (distance / maxDistance) * 100;
+  
+  if (distance < 20) {
+    return { message: '🎉 TROUVÉ! Le trésor est ici!', color: '#51cf66' };
+  } else if (distance < 50) {
+    return { message: '🔥 Tu brûles! Très proche!', color: '#ff6b6b' };
+  } else if (distance < 100) {
+    return { message: '🔥 Ça chauffe! Assez proche!', color: '#ff8787' };
+  } else if (distance < 200) {
+    return { message: '🌡️ Tiède... Continue de chercher', color: '#ffd43b' };
+  } else if (distance < 300) {
+    return { message: '❄️ Tu refroidis... Plus loin', color: '#74c0fc' };
+  } else {
+    return { message: '🧊 Ça gèle! Très loin!', color: '#339af0' };
+  }
+}
+
+// Fonction pour gérer le clic
+function gererClic(event) {
+  if (!partieEnCours) return;
+  
+  const rect = canvas.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+  
+  tentatives++;
+  const distance = calculerDistance(x, y, tresorX, tresorY);
+  const feedback = obtenirFeedback(distance);
+  
+  // Dessiner le point de clic
+  ctx.fillStyle = feedback.color;
+  ctx.beginPath();
+  ctx.arc(x, y, 5, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Dessiner un cercle de distance
+  ctx.strokeStyle = feedback.color;
+  ctx.lineWidth = 2;
+  ctx.setLineDash([5, 5]);
+  ctx.beginPath();
+  ctx.arc(x, y, distance, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  
+  afficherFeedback(feedback.message, feedback.color);
+  console.log(`Clic à (${Math.round(x)}, ${Math.round(y)}). Distance: ${Math.round(distance)}px`);
+  
+  if (distance < 20) {
+    partieEnCours = false;
+    // Dessiner le trésor
+    ctx.fillStyle = '#ffd700';
+    ctx.beginPath();
+    ctx.arc(tresorX, tresorY, 15, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    console.log(`Félicitations! Trésor trouvé en ${tentatives} tentatives!`);
+  }
+}
+
+// Fonction pour dessiner la carte
+function dessinerCarte() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  // Fond de la carte
+  ctx.fillStyle = '#8b4513';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  // Grille
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= canvas.width; i += 40) {
+    ctx.beginPath();
+    ctx.moveTo(i, 0);
+    ctx.lineTo(i, canvas.height);
+    ctx.stroke();
+  }
+  for (let i = 0; i <= canvas.height; i += 40) {
+    ctx.beginPath();
+    ctx.moveTo(0, i);
+    ctx.lineTo(canvas.width, i);
+    ctx.stroke();
+  }
+  
+  // Bordure
+  ctx.strokeStyle = '#654321';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(0, 0, canvas.width, canvas.height);
+}
+
+// Fonction pour afficher le feedback
+function afficherFeedback(message, color = 'var(--text-primary)') {
+  feedbackDiv.innerHTML = `<p style="color: ${color}; font-weight: bold;">${message}</p>`;
+}
+
+// Événements
+canvas.addEventListener('click', gererClic);
+newGameBtn.addEventListener('click', () => {
+  nouvellePartie();
+});
+
+// Initialisation
+nouvellePartie();
+console.log('=== Chasse au Trésor ===');
+console.log('');
+console.log('Cliquez sur la carte pour chercher le trésor!');
+console.log('Vous recevrez des indices de température:');
+console.log('  🔥 Tu brûles - Très proche');
+console.log('  🔥 Ça chauffe - Assez proche');
+console.log('  🌡️ Tiède - Moyen');
+console.log('  ❄️ Tu refroidis - Loin');
+console.log('  🧊 Ça gèle - Très loin');
+  </script>
+  <script src="../shared/js/terminal.js"></script>
+  <script>
+    const gameJsPath = 'js/game.js';
+    document.addEventListener('DOMContentLoaded', () => {
+      const codeEditor = document.getElementById('code-editor');
+      const executeBtn = document.getElementById('execute-btn');
+      const output = document.getElementById('output');
+      if (codeEditor && executeBtn && output) {
+        window.terminal = new Terminal('code-editor', 'execute-btn', 'output', gameJsPath);
+      }
+    });
+  </script>
+</body>
+</html>

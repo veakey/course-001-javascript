@@ -1,0 +1,7 @@
+#insult-display {
+  transition: all 0.3s ease;
+}
+
+#insult-display:hover {
+  transform: scale(1.02);
+}

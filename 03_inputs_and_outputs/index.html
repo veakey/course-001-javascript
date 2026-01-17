@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Le Farceur - Entrées et Sorties</title>
+  <link rel="stylesheet" href="../shared/css/glassui.css">
+  <link rel="stylesheet" href="../shared/css/common.css">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- CodeMirror -->
+  <link rel="stylesheet" href="../shared/css/codemirror/codemirror.css">
+  <link rel="stylesheet" href="../shared/css/codemirror/theme/monokai.css">
+  <script src="../shared/js/codemirror/codemirror.js"></script>
+  <script src="../shared/js/codemirror/mode/javascript.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="terminal-panel glass-panel">
+      <h2 style="margin-bottom: 16px; color: var(--text-primary);">Terminal</h2>
+      <div id="code-editor"></div>
+      <button id="execute-btn" class="glass-button primary">Exécuter</button>
+      <div id="output" class="glass-panel" style="margin-top: 16px; padding: 16px;"></div>
+    </div>
+    <div class="game-panel glass-panel">
+      <h2 style="margin-bottom: 16px; color: var(--text-primary);">Le Farceur</h2>
+      <div id="io-area" style="padding: 16px;">
+        <div id="input-area" style="margin-bottom: 16px;">
+          <label style="display: block; margin-bottom: 8px; color: var(--text-primary);">Entrée:</label>
+          <input type="text" id="user-input" class="glass-input" placeholder="Tapez votre texte ici..." style="width: 100%;">
+          <button id="submit-input" class="glass-button" style="margin-top: 8px;">Envoyer</button>
+        </div>
+        <div id="display-area" style="min-height: 200px; background: rgba(0, 0, 0, 0.2); border-radius: 8px; padding: 16px;"></div>
+      </div>
+    </div>
+  </div>
+  <script type="text/plain" id="game-code">
+// Le Farceur - Entrées et Sorties
+// Utilisez prompt(), console.log(), et les fonctions d'affichage
+
+const displayArea = document.getElementById('display-area');
+const userInput = document.getElementById('user-input');
+const submitBtn = document.getElementById('submit-input');
+
+// Simuler prompt() dans le navigateur
+function prompt(message) {
+  const userResponse = window.prompt(message);
+  if (userResponse === null) return null;
+  console.log(`Entrée utilisateur: ${userResponse}`);
+  return userResponse;
+}
+
+// Fonction pour afficher dans la zone d'affichage
+function afficher(texte) {
+  const p = document.createElement('p');
+  p.style.color = 'var(--text-primary)';
+  p.style.margin = '8px 0';
+  p.textContent = texte;
+  displayArea.appendChild(p);
+  displayArea.scrollTop = displayArea.scrollHeight;
+}
+
+function effacer() {
+  displayArea.innerHTML = '';
+  console.log('Affichage effacé');
+}
+
+// Gestionnaire pour l'input utilisateur
+let inputBuffer = [];
+submitBtn.addEventListener('click', () => {
+  const value = userInput.value;
+  if (value) {
+    inputBuffer.push(value);
+    afficher(`> ${value}`);
+    userInput.value = '';
+  }
+});
+
+userInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    submitBtn.click();
+  }
+});
+
+// Fonction pour lire l'input (simule readline)
+function lireInput() {
+  return new Promise((resolve) => {
+    const checkInput = () => {
+      if (inputBuffer.length > 0) {
+        resolve(inputBuffer.shift());
+      } else {
+        setTimeout(checkInput, 100);
+      }
+    };
+    checkInput();
+  });
+}
+
+// Exemple d'utilisation
+console.log('=== Le Farceur - Entrées et Sorties ===');
+console.log('');
+console.log('Fonctions disponibles:');
+console.log('  - prompt(message): Demande une entrée à l\'utilisateur');
+console.log('  - afficher(texte): Affiche du texte dans la zone d\'affichage');
+console.log('  - effacer(): Efface la zone d\'affichage');
+console.log('  - console.log(texte): Affiche dans la console');
+console.log('');
+console.log('Exemple:');
+console.log('  const nom = prompt("Quel est votre nom ?");');
+console.log('  afficher("Bonjour " + nom + " !");');
+  </script>
+  <script src="../shared/js/terminal.js"></script>
+  <script>
+    const gameJsPath = 'js/game.js';
+    document.addEventListener('DOMContentLoaded', () => {
+      const codeEditor = document.getElementById('code-editor');
+      const executeBtn = document.getElementById('execute-btn');
+      const output = document.getElementById('output');
+      if (codeEditor && executeBtn && output) {
+        window.terminal = new Terminal('code-editor', 'execute-btn', 'output', gameJsPath);
+      }
+    });
+  </script>
+</body>
+</html>

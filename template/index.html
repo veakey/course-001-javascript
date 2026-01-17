@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mini-Jeu JavaScript</title>
+  <link rel="stylesheet" href="../shared/css/glassui.css">
+  <link rel="stylesheet" href="../shared/css/common.css">
+  <!-- CodeMirror -->
+  <link rel="stylesheet" href="../shared/css/codemirror/codemirror.css">
+  <link rel="stylesheet" href="../shared/css/codemirror/theme/monokai.css">
+  <script src="../shared/js/codemirror/codemirror.js"></script>
+  <script src="../shared/js/codemirror/mode/javascript.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="terminal-panel glass-panel">
+      <h2 style="margin-bottom: 16px; color: var(--text-primary);">Terminal</h2>
+      <div id="code-editor"></div>
+      <button id="execute-btn" class="glass-button primary">Exécuter</button>
+      <div id="output" class="glass-panel" style="margin-top: 16px; padding: 16px;"></div>
+    </div>
+    <div class="game-panel glass-panel">
+      <h2 style="margin-bottom: 16px; color: var(--text-primary);">Jeu</h2>
+      <!-- Zone de jeu spécifique -->
+      <div id="game-area" style="flex: 1; display: flex; align-items: center; justify-content: center;">
+        <p style="color: var(--text-secondary);">Zone de jeu</p>
+      </div>
+    </div>
+  </div>
+  <script src="../shared/js/terminal.js"></script>
+  <script>
+    // Le chemin vers game.js sera défini dans chaque projet
+    const gameJsPath = 'js/game.js';
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.terminal) {
+        // Le terminal est déjà initialisé
+      } else {
+        // Initialisation manuelle si nécessaire
+        const codeEditor = document.getElementById('code-editor');
+        const executeBtn = document.getElementById('execute-btn');
+        const output = document.getElementById('output');
+        if (codeEditor && executeBtn && output) {
+          window.terminal = new Terminal('code-editor', 'execute-btn', 'output', gameJsPath);
+        }
+      }
+    });
+  </script>
+</body>
+</html>
