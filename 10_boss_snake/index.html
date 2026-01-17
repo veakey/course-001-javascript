@@ -150,7 +150,7 @@ function mettreAJour() {
   const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
   
   // Vérifier les collisions avec les murs
-  if (head.x <= 0 || head.x >= tileCount || head.y <= 0 || head.y >= tileCount) {
+  if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
     finPartie();
     dessiner(); // Dessiner une dernière fois pour afficher l'état final
     return;

@@ -182,14 +182,14 @@ function dessinerChat() {
   const centreY = canvas.height / 2 - 50;
   const taille = 80;
   
-  dessinerTete(centreX, centreY - taille * 0.5, taille);
-  dessinerCorps(centreX, centreY, taille);
   dessinerOreilles(centreX, centreY - taille * 0.5, taille);
-  dessinerYeux(centreX, centreY - taille * 0.5, taille);
+  dessinerCorps(centreX, centreY, taille);
+  dessinerPattes(centreX, centreY - taille * 0.5, taille);
+  dessinerTete(centreX, centreY - taille * 0.5, taille);
+  dessinerQueue(centreX, centreY - taille * 0.5, taille);
   dessinerNez(centreX, centreY - taille * 0.5, taille);
   dessinerBouche(centreX, centreY - taille * 0.5, taille);
-  dessinerPattes(centreX, centreY - taille * 0.5, taille);
-  dessinerQueue(centreX, centreY - taille * 0.5, taille);
+  dessinerYeux(centreX, centreY - taille * 0.5, taille);
   
   console.log('Chat complet dessiné!');
 }

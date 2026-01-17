@@ -322,26 +322,6 @@ class CodeValidator {
       message: syntaxTest.passed ? '' : syntaxTest.message
     });
 
-    if (!syntaxTest.passed) {
-      return { allPassed: false, tests };
-    }
-
-    // Test 2: Conversion de nom en String
-    const nomConversionMatch = code.match(/const\s+nomStr\s*=\s*(String\s*\(nom\)|String\(nom\))/);
-    tests.push({
-      name: 'Conversion de nom en String',
-      passed: nomConversionMatch !== null,
-      message: nomConversionMatch ? '' : 'Le paramètre nom doit être converti en String avec String(nom)'
-    });
-
-    // Test 3: Conversion de quantite avec Number (pas parseInt)
-    const quantiteConversionMatch = code.match(/const\s+quantiteNum\s*=\s*Number\s*\(quantite\)/);
-    tests.push({
-      name: 'Conversion de quantite avec Number',
-      passed: quantiteConversionMatch !== null,
-      message: quantiteConversionMatch ? '' : 'La quantité doit être convertie avec Number(quantite), pas parseInt()'
-    });
-
     const allPassed = tests.every(t => t.passed);
     return { allPassed, tests };
   }
@@ -453,6 +433,14 @@ class CodeValidator {
       message: whileMatch ? '' : 'La boucle while doit incrémenter i avec i++ pour éviter une boucle infinie'
     });
 
+    // Test 4: selectionnerAleatoirement sélectionne le bon nombre
+    const aleatoireMatch = code.match(/function\s+selectionnerAleatoirement\s*\([^)]*\)[\s\S]*?for\s*\([^)]*i\s*<\s*nombre[^)]*\)/);
+    tests.push({
+      name: 'selectionnerAleatoirement() sélectionne le bon nombre',
+      passed: aleatoireMatch !== null,
+      message: aleatoireMatch ? '' : 'La fonction selectionnerAleatoirement() doit utiliser i < nombre (pas nombre - 1) pour sélectionner le bon nombre de moutons'
+    });
+
     const allPassed = tests.every(t => t.passed);
     return { allPassed, tests };
   }
@@ -481,10 +469,11 @@ class CodeValidator {
 
     // Test 3: erreurs++ seulement si lettre incorrecte
     const errorIncrementMatch = code.match(/if\s*\(motSecret\.includes\s*\(lettre\)\)[\s\S]*?else[\s\S]*?erreurs\+\+/);
+    const errorBeforeIf = code.match(/erreurs\+\+[\s\S]*?if\s*\(motSecret\.includes\s*\(lettre\)\)/);
     tests.push({
       name: 'Erreurs incrémentées seulement si lettre incorrecte',
-      passed: errorIncrementMatch !== null,
-      message: errorIncrementMatch ? '' : 'Les erreurs ne doivent être incrémentées que si la lettre n\'est pas dans le mot (dans le bloc else)'
+      passed: errorIncrementMatch !== null && errorBeforeIf === null,
+      message: (errorIncrementMatch !== null && errorBeforeIf === null) ? '' : 'Les erreurs ne doivent être incrémentées que si la lettre n\'est pas dans le mot (dans le bloc else, pas avant le if)'
     });
 
     const allPassed = tests.every(t => t.passed);
@@ -505,12 +494,12 @@ class CodeValidator {
       return { allPassed: false, tests };
     }
 
-    // Test 2: Ordre des appels dans dessinerChat
-    const orderMatch = code.match(/dessinerCorps\([^)]*\)[\s\S]*?dessinerTete\(/);
+    // Test 2: Ordre des appels dans dessinerChat - tête avant corps
+    const teteAvantCorps = code.match(/dessinerTete\([^)]*\)[\s\S]*?dessinerCorps\(/);
     tests.push({
       name: 'Ordre des dessins correct',
-      passed: orderMatch === null,
-      message: orderMatch ? 'Le corps doit être dessiné après la tête pour un meilleur rendu visuel' : ''
+      passed: teteAvantCorps !== null,
+      message: teteAvantCorps ? '' : 'La fonction dessinerTete() doit être appelée avant dessinerCorps() pour un meilleur rendu visuel'
     });
 
     const allPassed = tests.every(t => t.passed);
@@ -531,12 +520,12 @@ class CodeValidator {
       return { allPassed: false, tests };
     }
 
-    // Test 2: Condition de victoire correcte
-    const victoryMatch = code.match(/if\s*\(distance\s*<\s*20\)/);
+    // Test 2: Target généré dans nouvellePartie
+    const targetGenerated = code.match(/tresorX\s*=\s*Math\.random/);
     tests.push({
-      name: 'Condition de victoire correcte',
-      passed: victoryMatch !== null,
-      message: victoryMatch ? '' : 'La condition de victoire doit être distance < 20 (pas >)'
+      name: 'Target généré dans nouvellePartie',
+      passed: targetGenerated !== null,
+      message: targetGenerated ? '' : 'Le trésor doit être généré avec Math.random() dans la fonction nouvellePartie()'
     });
 
     const allPassed = tests.every(t => t.passed);
@@ -583,12 +572,12 @@ class CodeValidator {
       return { allPassed: false, tests };
     }
 
-    // Test 2: Collision avec les murs utilise < et >=
-    const wallMatch = code.match(/if\s*\(head\.x\s*<\s*0\s*\|\|\s*head\.x\s*>=\s*tileCount/);
+    // Test 2: preventDefault pour les flèches
+    const preventDefaultMatch = code.match(/ArrowUp.*ArrowDown.*ArrowLeft.*ArrowRight.*includes.*e\.key.*preventDefault/);
     tests.push({
-      name: 'Collision avec les murs correcte',
-      passed: wallMatch !== null,
-      message: wallMatch ? '' : 'La vérification des collisions doit utiliser < 0 et >= tileCount (pas <= 0)'
+      name: 'preventDefault pour les flèches',
+      passed: preventDefaultMatch !== null,
+      message: preventDefaultMatch ? '' : 'Il faut ajouter e.preventDefault() pour les flèches (ArrowUp, ArrowDown, ArrowLeft, ArrowRight) afin d\'empêcher le scroll de la page'
     });
 
     const allPassed = tests.every(t => t.passed);

@@ -89,13 +89,38 @@ console.log('  for (let i = 1; i <= 5; i++) {');
 
 ---
 
+### Bug 4 : `selectionnerAleatoirement()` sélectionne un mouton de moins
+
+**Problème :** La fonction sélectionne `nombre - 1` moutons au lieu de `nombre` moutons.
+
+**Code bugué :**
+```javascript
+// Sélectionner les N premiers
+for (let i = 0; i < nombre - 1; i++) {  // ❌ BUG : sélectionne nombre - 1 au lieu de nombre
+  moutons[indices[i]].selectionne = true;
+}
+```
+
+**Solution :**
+```javascript
+// Sélectionner les N premiers
+for (let i = 0; i < nombre; i++) {  // ✅ CORRIGÉ : sélectionne le bon nombre
+  moutons[indices[i]].selectionne = true;
+}
+```
+
+**Explication :** Si on demande de sélectionner 4 moutons, la fonction doit en sélectionner 4, pas 3. La condition `i < nombre - 1` exclut le dernier mouton.
+
+---
+
 ## ✅ Code corrigé complet
 
-Voici les trois corrections à apporter :
+Voici les quatre corrections à apporter :
 
 1. **Ligne ~88** : Changer `i < fin` en `i <= fin`
 2. **Ligne ~99** : Ajouter `i++;` après `console.log(i);` dans la boucle while
-3. **Ligne ~183** : Ajouter le guillemet manquant : `...i++) {');`
+3. **Ligne ~159** : Changer `i < nombre - 1` en `i < nombre`
+4. **Ligne ~183** : Ajouter le guillemet manquant : `...i++) {');`
 
 Une fois ces corrections appliquées, tous les tests de validation devraient passer au vert ! ✅
 
