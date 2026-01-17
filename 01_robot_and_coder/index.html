@@ -24,6 +24,7 @@
     <div class="game-panel glass-panel">
       <h2 style="margin-bottom: 16px; color: var(--text-primary);">Le Robot</h2>
       <canvas id="game-canvas" width="600" height="600"></canvas>
+      <div id="game-message" style="text-align: center; font-size: 24px; font-weight: bold; margin: 16px 0; min-height: 32px; display: none;"></div>
     </div>
   </div>
   <script type="text/plain" id="game-code">
@@ -44,10 +45,82 @@ let robotGridY = Math.floor(tileCountY / 2);
 let robotAngle = 0; // Angle en degrés (0 = vers la droite)
 const robotSize = 30;
 
+// Point d'arrivée
+let targetGridX = -1; // -1 indique que le point n'a pas encore été généré
+let targetGridY = -1;
+let gameWon = false;
+
 // Queue d'instructions pour l'animation
 let instructionQueue = [];
 let isExecuting = false;
 const DELAY_MS = 100;
+
+// Position initiale du robot (pour calculer la distance minimale)
+const initialRobotX = Math.floor(tileCountX / 2);
+const initialRobotY = Math.floor(tileCountY / 2);
+
+// Fonction pour vérifier si une position est valide
+function estPositionValide(x, y) {
+  // Vérifier que la position est au moins à 3 cases des bords
+  if (x < 3 || x >= tileCountX - 3 || y < 3 || y >= tileCountY - 3) {
+    return false;
+  }
+  
+  // Vérifier que la distance avec le robot initial est >= 3
+  const distance = Math.abs(x - initialRobotX) + Math.abs(y - initialRobotY);
+  return distance >= 3;
+}
+
+// Fonction pour générer le point d'arrivée
+function genererPointArrivee(x, y) {
+  // Si x et y sont fournis, utiliser ces positions
+  if (x !== undefined && y !== undefined) {
+    // Valider la position fournie
+    if (estPositionValide(x, y)) {
+      targetGridX = x;
+      targetGridY = y;
+      console.log(`Point d'arrivée défini à (${targetGridX}, ${targetGridY})`);
+      return;
+    } else {
+      console.warn(`Position (${x}, ${y}) n'est pas valide. Génération d'une position aléatoire à la place.`);
+      // Continuer pour générer une position aléatoire
+    }
+  }
+  
+  // Ne pas régénérer si un point d'arrivée existe déjà et que le jeu n'est pas gagné
+  if (targetGridX >= 0 && targetGridY >= 0 && !gameWon) {
+    console.log(`Point d'arrivée déjà défini à (${targetGridX}, ${targetGridY}). Utilisation de la position existante.`);
+    return;
+  }
+  
+  const positionsValides = [];
+  
+  // Générer toutes les positions valides (au moins 3 cases des bords)
+  for (let posX = 3; posX < tileCountX - 3; posX++) {
+    for (let posY = 3; posY < tileCountY - 3; posY++) {
+      // Calculer la distance de Manhattan avec le robot initial
+      const distance = Math.abs(posX - initialRobotX) + Math.abs(posY - initialRobotY);
+      
+      // Vérifier que la distance est >= 3
+      if (distance >= 3) {
+        positionsValides.push({ x: posX, y: posY });
+      }
+    }
+  }
+  
+  // Choisir une position aléatoire parmi les positions valides
+  if (positionsValides.length > 0) {
+    const positionAleatoire = positionsValides[Math.floor(Math.random() * positionsValides.length)];
+    targetGridX = positionAleatoire.x;
+    targetGridY = positionAleatoire.y;
+    console.log(`Point d'arrivée généré aléatoirement à (${targetGridX}, ${targetGridY})`);
+  } else {
+    // Fallback si aucune position valide (ne devrait pas arriver avec une grille 15x15)
+    targetGridX = tileCountX - 4;
+    targetGridY = tileCountY - 4;
+    console.warn('Aucune position valide trouvée, utilisation d\'une position par défaut');
+  }
+}
 
 // Fonction pour exécuter la queue d'instructions avec délai
 async function executerQueue() {
@@ -64,8 +137,33 @@ async function executerQueue() {
   isExecuting = false;
 }
 
+// Fonction pour vérifier la victoire
+function verifierVictoire() {
+  if (robotGridX === targetGridX && robotGridY === targetGridY && !gameWon) {
+    victoire();
+  }
+}
+
+// Fonction de victoire
+function victoire() {
+  gameWon = true;
+  const gameMessage = document.getElementById('game-message');
+  if (gameMessage) {
+    gameMessage.textContent = '🎉 Félicitations! Vous avez gagné! 🎉';
+    gameMessage.style.display = 'block';
+    gameMessage.style.color = '#4ade80'; // Vert
+    gameMessage.style.textAlign = 'center';
+    gameMessage.style.fontSize = '24px';
+    gameMessage.style.fontWeight = 'bold';
+    gameMessage.style.margin = '16px 0';
+  }
+  console.log('Victoire! Le robot a atteint le point d\'arrivée!');
+}
+
 // Fonctions de mouvement (ajoutent à la queue)
 function avancer() {
+  if (gameWon) return;
+  
   instructionQueue.push(() => {
     // Calculer la direction de déplacement selon l'angle
     let deltaX = 0;
@@ -92,12 +190,17 @@ function avancer() {
     }
     
     console.log(`Robot avance. Position grille: (${robotGridX}, ${robotGridY})`);
+    
+    // Vérifier la victoire
+    verifierVictoire();
   });
   
   executerQueue();
 }
 
 function reculer() {
+  if (gameWon) return;
+  
   instructionQueue.push(() => {
     // Calculer la direction de déplacement inverse selon l'angle
     let deltaX = 0;
@@ -124,12 +227,17 @@ function reculer() {
     }
     
     console.log(`Robot recule. Position grille: (${robotGridX}, ${robotGridY})`);
+    
+    // Vérifier la victoire
+    verifierVictoire();
   });
   
   executerQueue();
 }
 
 function tournerGauche() {
+  if (gameWon) return;
+  
   instructionQueue.push(() => {
     robotAngle -= 90;
     console.log(`Robot tourne à gauche. Angle: ${robotAngle}°`);
@@ -139,12 +247,42 @@ function tournerGauche() {
 }
 
 function tournerDroite() {
+  if (gameWon) return;
+  
   instructionQueue.push(() => {
     robotAngle += 90;
     console.log(`Robot tourne à droite. Angle: ${robotAngle}°`);
   });
   
   executerQueue();
+}
+
+function dessinerDrapeau() {
+  // Convertir coordonnées grille en pixels (centre de la case)
+  const targetX = targetGridX * tileSize + tileSize / 2;
+  const targetY = targetGridY * tileSize + tileSize / 2;
+  
+  // Dessiner le mât du drapeau
+  ctx.strokeStyle = '#8b4513'; // Marron
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(targetX - tileSize / 2 + 5, targetY - tileSize / 2);
+  ctx.lineTo(targetX - tileSize / 2 + 5, targetY + tileSize / 2);
+  ctx.stroke();
+  
+  // Dessiner le drapeau (triangle)
+  ctx.fillStyle = '#ff4444'; // Rouge
+  ctx.beginPath();
+  ctx.moveTo(targetX - tileSize / 2 + 5, targetY - tileSize / 2);
+  ctx.lineTo(targetX - tileSize / 2 + 5, targetY - tileSize / 2 + tileSize / 2);
+  ctx.lineTo(targetX + tileSize / 2 - 5, targetY - tileSize / 2 + tileSize / 4);
+  ctx.closePath();
+  ctx.fill();
+  
+  // Bordure du drapeau
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 1;
+  ctx.stroke();
 }
 
 function dessiner() {
@@ -166,6 +304,9 @@ function dessiner() {
     ctx.lineTo(canvas.width, i);
     ctx.stroke();
   }
+  
+  // Dessiner le drapeau (point d'arrivée)
+  dessinerDrapeau();
   
   // Convertir coordonnées grille en pixels (centre de la case)
   const robotX = robotGridX * tileSize + tileSize / 2;
@@ -198,8 +339,10 @@ function dessiner() {
 }
 
 // Initialisation
+genererPointArrivee();
 dessiner();
 console.log('Robot initialisé au centre. Utilisez avancer(), reculer(), tournerGauche(), tournerDroite()');
+console.log(`Objectif: Atteindre le point d'arrivée à (${targetGridX}, ${targetGridY})`);
   </script>
   <script src="../shared/js/terminal.js"></script>
   <script>
