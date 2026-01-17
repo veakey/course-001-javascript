@@ -217,24 +217,49 @@ class Terminal {
   }
 
   validateCode(code) {
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/fa4766f7-5e1c-455a-ba2a-bc2044abe366',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'terminal.js:validateCode:entry',message:'validateCode called',data:{hasValidator:!!this.validator,gameId:this.gameId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
     if (!this.validator || !this.gameId) {
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/fa4766f7-5e1c-455a-ba2a-bc2044abe366',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'terminal.js:validateCode:early-return',message:'Early return - missing validator or gameId',data:{hasValidator:!!this.validator,gameId:this.gameId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
       return;
     }
 
     try {
-      const result = this.validator.validate(this.gameId, code);
+      const codeToValidate = code || this.editor.getValue();
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/fa4766f7-5e1c-455a-ba2a-bc2044abe366',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'terminal.js:validateCode:before-validate',message:'Before validate call',data:{gameId:this.gameId,codeLength:codeToValidate.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
+      const result = this.validator.validate(this.gameId, codeToValidate);
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/fa4766f7-5e1c-455a-ba2a-bc2044abe366',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'terminal.js:validateCode:after-validate',message:'After validate call',data:{allPassed:result.allPassed,testsCount:result.tests.length,tests:result.tests.map(t=>({name:t.name,passed:t.passed}))},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
       this.updateValidationUI(result);
     } catch (error) {
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/fa4766f7-5e1c-455a-ba2a-bc2044abe366',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'terminal.js:validateCode:error',message:'Validation error',data:{error:error.message,stack:error.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+      // #endregion
       console.error('Erreur lors de la validation:', error);
     }
   }
 
   updateValidationUI(result) {
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/fa4766f7-5e1c-455a-ba2a-bc2044abe366',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'terminal.js:updateValidationUI:entry',message:'updateValidationUI called',data:{allPassed:result.allPassed,testsCount:result.tests.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
     const panel = document.getElementById('validation-panel');
     const statusDiv = document.getElementById('validation-status');
     const testsList = document.getElementById('validation-tests');
 
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/fa4766f7-5e1c-455a-ba2a-bc2044abe366',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'terminal.js:updateValidationUI:check-elements',message:'Checking DOM elements',data:{hasPanel:!!panel,hasStatusDiv:!!statusDiv,hasTestsList:!!testsList},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
     if (!panel || !statusDiv || !testsList) {
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/fa4766f7-5e1c-455a-ba2a-bc2044abe366',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'terminal.js:updateValidationUI:missing-elements',message:'Missing DOM elements',data:{hasPanel:!!panel,hasStatusDiv:!!statusDiv,hasTestsList:!!testsList},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
       return;
     }
 

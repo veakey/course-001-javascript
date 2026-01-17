@@ -4,7 +4,31 @@ Ce document contient les solutions pour corriger les bugs intentionnels introdui
 
 ## 🐛 Bugs à corriger
 
-### Bug 1 : Guillemet manquant dans `console.log()`
+### Bug 1 : Addition incorrecte des quantités
+
+**Problème :** Lorsqu'un item existe déjà dans l'inventaire, la quantité ajoutée est incorrecte. Le code soustrait 2 au lieu d'ajouter la quantité exacte.
+
+**Code bugué :**
+```javascript
+if (itemExistant) {
+  // Si l'item existe déjà, additionner les quantités
+  itemExistant.quantite += quantiteNum - 2;  // ❌ BUG : soustrait 2 au lieu d'ajouter la quantité exacte
+  console.log(`Quantité mise à jour: ${nomStr} (${typeStr}) x${itemExistant.quantite} (${quantiteNum} ajouté)`);
+}
+```
+
+**Solution :**
+```javascript
+if (itemExistant) {
+  // Si l'item existe déjà, additionner les quantités
+  itemExistant.quantite += quantiteNum;  // ✅ CORRIGÉ : ajoute la quantité exacte
+  console.log(`Quantité mise à jour: ${nomStr} (${typeStr}) x${itemExistant.quantite} (${quantiteNum} ajouté)`);
+}
+```
+
+**Explication :** Lors de la mise à jour d'un item existant, il faut additionner exactement la quantité fournie (`quantiteNum`), sans soustraire 2. Le bug fait que si vous ajoutez 5 items, seulement 3 sont réellement ajoutés à l'inventaire.
+
+### Bug 2 : Guillemet manquant dans `console.log()`
 
 **Problème :** Un guillemet de fermeture manque dans un `console.log()`, ce qui cause une erreur de syntaxe.
 
@@ -26,9 +50,10 @@ console.log('Exemple: ajouterItem("Épée", "Arme", 1)');
 
 ## ✅ Code corrigé complet
 
-Voici la correction à apporter :
+Voici les corrections à apporter :
 
-1. **Ligne ~103** : Ajouter le guillemet manquant : `...1)');`
+1. **Ligne ~57** : Corriger l'addition : `itemExistant.quantite += quantiteNum;` (enlever le `- 2`)
+2. **Ligne ~109** : Ajouter le guillemet manquant : `...1)');`
 
 Une fois ces corrections appliquées, tous les tests de validation devraient passer au vert ! ✅
 

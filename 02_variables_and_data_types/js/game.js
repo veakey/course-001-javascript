@@ -19,7 +19,7 @@ function ajouterItem(nom, type, quantite = 1) {
   
   if (itemExistant) {
     // Si l'item existe déjà, additionner les quantités
-    itemExistant.quantite += quantiteNum;
+    itemExistant.quantite += quantiteNum - 2;
     console.log(`Quantité mise à jour: ${nomStr} (${typeStr}) x${itemExistant.quantite} (${quantiteNum} ajouté)`);
   } else {
     // Sinon, ajouter un nouvel item

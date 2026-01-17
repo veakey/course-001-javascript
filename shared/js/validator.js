@@ -322,6 +322,19 @@ class CodeValidator {
       message: syntaxTest.passed ? '' : syntaxTest.message
     });
 
+    if (!syntaxTest.passed) {
+      return { allPassed: false, tests };
+    }
+
+    // Test 2: Addition correcte des quantités (pas de -2)
+    const correctAddition = code.match(/itemExistant\.quantite\s*\+=\s*quantiteNum\s*;/);
+    const bugAddition = code.match(/itemExistant\.quantite\s*\+=\s*quantiteNum\s*-\s*2\s*;/);
+    tests.push({
+      name: 'Addition correcte des quantités',
+      passed: correctAddition !== null && bugAddition === null,
+      message: (correctAddition !== null && bugAddition === null) ? '' : 'La fonction ajouterItem() doit additionner exactement quantiteNum (pas quantiteNum - 2)'
+    });
+
     const allPassed = tests.every(t => t.passed);
     return { allPassed, tests };
   }
@@ -434,11 +447,15 @@ class CodeValidator {
     });
 
     // Test 4: selectionnerAleatoirement sélectionne le bon nombre
-    const aleatoireMatch = code.match(/function\s+selectionnerAleatoirement\s*\([^)]*\)[\s\S]*?for\s*\([^)]*i\s*<\s*nombre[^)]*\)/);
+    const aleatoireMatchCorrect = code.match(/function\s+selectionnerAleatoirement\s*\([^)]*\)[\s\S]*?for\s*\([^)]*i\s*<\s*nombre\s*\)/);
+    const aleatoireMatchBug = code.match(/function\s+selectionnerAleatoirement\s*\([^)]*\)[\s\S]*?for\s*\([^)]*i\s*<\s*nombre\s*-\s*1\s*\)/);
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/fa4766f7-5e1c-455a-ba2a-bc2044abe366',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'validator.js:validateLoops:selectionnerAleatoirement',message:'Testing selectionnerAleatoirement',data:{aleatoireMatchCorrect:!!aleatoireMatchCorrect,aleatoireMatchBug:!!aleatoireMatchBug,passed:aleatoireMatchCorrect !== null && aleatoireMatchBug === null},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+    // #endregion
     tests.push({
       name: 'selectionnerAleatoirement() sélectionne le bon nombre',
-      passed: aleatoireMatch !== null,
-      message: aleatoireMatch ? '' : 'La fonction selectionnerAleatoirement() doit utiliser i < nombre (pas nombre - 1) pour sélectionner le bon nombre de moutons'
+      passed: aleatoireMatchCorrect !== null && aleatoireMatchBug === null,
+      message: (aleatoireMatchCorrect !== null && aleatoireMatchBug === null) ? '' : 'La fonction selectionnerAleatoirement() doit utiliser i < nombre (pas nombre - 1) pour sélectionner le bon nombre de moutons'
     });
 
     const allPassed = tests.every(t => t.passed);
@@ -520,12 +537,13 @@ class CodeValidator {
       return { allPassed: false, tests };
     }
 
-    // Test 2: Target généré dans nouvellePartie
-    const targetGenerated = code.match(/tresorX\s*=\s*Math\.random/);
+    // Test 2: Target généré dans nouvellePartie (pas commenté)
+    const targetGenerated = code.match(/function\s+nouvellePartie\s*\([^)]*\)[\s\S]*?tresorX\s*=\s*Math\.random/);
+    const targetCommented = code.match(/function\s+nouvellePartie\s*\([^)]*\)[\s\S]*?\/\/\s*tresorX\s*=\s*Math\.random/);
     tests.push({
       name: 'Target généré dans nouvellePartie',
-      passed: targetGenerated !== null,
-      message: targetGenerated ? '' : 'Le trésor doit être généré avec Math.random() dans la fonction nouvellePartie()'
+      passed: targetGenerated !== null && targetCommented === null,
+      message: (targetGenerated !== null && targetCommented === null) ? '' : 'Le trésor doit être généré avec Math.random() dans la fonction nouvellePartie() (les lignes ne doivent pas être commentées)'
     });
 
     const allPassed = tests.every(t => t.passed);
@@ -573,10 +591,18 @@ class CodeValidator {
     }
 
     // Test 2: preventDefault pour les flèches
-    const preventDefaultMatch = code.match(/ArrowUp.*ArrowDown.*ArrowLeft.*ArrowRight.*includes.*e\.key.*preventDefault/);
+    // Chercher preventDefault avant le switch ou dans le contexte des flèches
+    const keydownIndex = code.indexOf('keydown');
+    const keydownSection = keydownIndex !== -1 ? code.substring(keydownIndex, keydownIndex + 1000) : '';
+    const hasArrowKeys = /ArrowUp|ArrowDown|ArrowLeft|ArrowRight/.test(keydownSection);
+    const hasPreventDefault = /e\.preventDefault\s*\(\)/.test(keydownSection);
+    const preventDefaultMatch = hasArrowKeys && hasPreventDefault;
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/fa4766f7-5e1c-455a-ba2a-bc2044abe366',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'validator.js:validateSnake:preventDefault',message:'Testing preventDefault',data:{preventDefaultMatch,hasArrowKeys,hasPreventDefault,keydownSection:keydownSection.substring(0,200)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+    // #endregion
     tests.push({
       name: 'preventDefault pour les flèches',
-      passed: preventDefaultMatch !== null,
+      passed: preventDefaultMatch,
       message: preventDefaultMatch ? '' : 'Il faut ajouter e.preventDefault() pour les flèches (ArrowUp, ArrowDown, ArrowLeft, ArrowRight) afin d\'empêcher le scroll de la page'
     });
 
