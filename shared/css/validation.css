@@ -1,0 +1,157 @@
+/* Styles pour le panneau de validation */
+
+.validation-panel {
+  margin-top: 16px;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+.validation-panel h3 {
+  margin: 0 0 12px 0;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.validation-status {
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  font-weight: 500;
+  font-size: 14px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.validation-status.all-passed {
+  background: rgba(74, 222, 128, 0.2);
+  border: 1px solid rgba(74, 222, 128, 0.4);
+  color: #4ade80;
+}
+
+.validation-status.some-failed {
+  background: rgba(251, 146, 60, 0.2);
+  border: 1px solid rgba(251, 146, 60, 0.4);
+  color: #fb923c;
+}
+
+.validation-status.all-failed {
+  background: rgba(248, 113, 113, 0.2);
+  border: 1px solid rgba(248, 113, 113, 0.4);
+  color: #f87171;
+}
+
+.validation-tests {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.test-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease;
+}
+
+.test-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.test-item.test-passed {
+  border-left: 3px solid #4ade80;
+}
+
+.test-item.test-failed {
+  border-left: 3px solid #f87171;
+}
+
+.test-icon {
+  font-size: 16px;
+  font-weight: bold;
+  flex-shrink: 0;
+  width: 20px;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.test-item.test-passed .test-icon {
+  color: #4ade80;
+}
+
+.test-item.test-failed .test-icon {
+  color: #f87171;
+}
+
+.test-name {
+  flex: 1;
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.test-item.test-passed .test-name {
+  color: rgba(74, 222, 128, 0.9);
+}
+
+.test-item.test-failed .test-name {
+  color: rgba(248, 113, 113, 0.9);
+}
+
+.test-message {
+  color: var(--text-secondary);
+  font-size: 12px;
+  margin-top: 4px;
+  font-style: italic;
+  width: 100%;
+  padding-left: 28px;
+}
+
+.test-item.test-failed .test-message {
+  color: rgba(248, 113, 113, 0.8);
+}
+
+/* Animation pour les changements de statut */
+.test-item {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .validation-panel {
+    padding: 12px;
+  }
+
+  .validation-panel h3 {
+    font-size: 14px;
+  }
+
+  .test-name {
+    font-size: 13px;
+  }
+
+  .test-message {
+    font-size: 11px;
+  }
+}

@@ -6,6 +6,7 @@
   <title>Boss Final - Snake</title>
   <link rel="stylesheet" href="../shared/css/glassui.css">
   <link rel="stylesheet" href="../shared/css/common.css">
+  <link rel="stylesheet" href="../shared/css/validation.css">
   <link rel="stylesheet" href="css/style.css">
   <!-- CodeMirror -->
   <link rel="stylesheet" href="../shared/css/codemirror/codemirror.css">
@@ -20,6 +21,11 @@
       <div id="code-editor"></div>
       <button id="execute-btn" class="glass-button primary">Exécuter</button>
       <div id="output" class="glass-panel" style="margin-top: 16px; padding: 16px;"></div>
+      <div id="validation-panel" class="validation-panel glass-panel" style="display: none;">
+        <h3 style="margin-bottom: 12px;">Tests de validation</h3>
+        <div id="validation-status" class="validation-status"></div>
+        <ul id="validation-tests" class="validation-tests"></ul>
+      </div>
     </div>
     <div class="game-panel glass-panel">
       <h2 style="margin-bottom: 16px; color: var(--text-primary);">Snake - Boss Final</h2>
@@ -144,7 +150,7 @@ function mettreAJour() {
   const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
   
   // Vérifier les collisions avec les murs
-  if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
+  if (head.x <= 0 || head.x >= tileCount || head.y <= 0 || head.y >= tileCount) {
     finPartie();
     dessiner(); // Dessiner une dernière fois pour afficher l'état final
     return;
@@ -324,8 +330,9 @@ console.log('Objectif: Mangez la nourriture pour grandir et augmenter votre scor
 console.log('  - Bleu: Grandir de 1 segment');
 console.log('  - Vert: Grandir de 2 segments');
 console.log('  - Rouge: Game Over! Évitez-le!');
-console.log('Évitez les murs et votre propre corps!');
+console.log('Évitez les murs et votre propre corps!);
   </script>
+  <script src="../shared/js/validator.js"></script>
   <script src="../shared/js/terminal.js"></script>
   <script>
     const gameJsPath = 'js/game.js';

@@ -6,6 +6,7 @@
   <title>L'inventaire - Variables et Types de Données</title>
   <link rel="stylesheet" href="../shared/css/glassui.css">
   <link rel="stylesheet" href="../shared/css/common.css">
+  <link rel="stylesheet" href="../shared/css/validation.css">
   <link rel="stylesheet" href="css/style.css">
   <!-- CodeMirror -->
   <link rel="stylesheet" href="../shared/css/codemirror/codemirror.css">
@@ -20,6 +21,11 @@
       <div id="code-editor"></div>
       <button id="execute-btn" class="glass-button primary">Exécuter</button>
       <div id="output" class="glass-panel" style="margin-top: 16px; padding: 16px;"></div>
+      <div id="validation-panel" class="validation-panel glass-panel" style="display: none;">
+        <h3 style="margin-bottom: 12px;">Tests de validation</h3>
+        <div id="validation-status" class="validation-status"></div>
+        <ul id="validation-tests" class="validation-tests"></ul>
+      </div>
     </div>
     <div class="game-panel glass-panel">
       <h2 style="margin-bottom: 16px; color: var(--text-primary);">Inventaire</h2>
@@ -37,9 +43,9 @@ let inventaire = [];
 
 // Fonction pour ajouter un item à l'inventaire
 function ajouterItem(nom, type, quantite = 1) {
-  const nomStr = String(nom);
+  const nomStr = nom;
   const typeStr = String(type);
-  const quantiteNum = Number(quantite);
+  const quantiteNum = parseInt(quantite);
   
   // Chercher si un item avec le même nom et type existe déjà
   const itemExistant = inventaire.find(item => 
@@ -100,11 +106,12 @@ console.log('or:', or, '(number)');
 console.log('estVivant:', estVivant, '(boolean)');
 console.log('');
 console.log('Utilisez ajouterItem(nom, type, quantite) pour ajouter des items à l\'inventaire');
-console.log('Exemple: ajouterItem("Épée", "Arme", 1)');
+console.log('Exemple: ajouterItem("Épée", "Arme", 1);
 
 // Initialisation
 afficherInventaire();
   </script>
+  <script src="../shared/js/validator.js"></script>
   <script src="../shared/js/terminal.js"></script>
   <script>
     const gameJsPath = 'js/game.js';

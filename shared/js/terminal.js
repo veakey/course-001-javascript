@@ -12,11 +12,35 @@ class Terminal {
     this.gameJsPath = gameJsPath;
     this.originalCode = '';
     this.editor = null;
+    this.validator = null;
+    this.gameId = this.detectGameId();
 
     this.init();
   }
 
+  detectGameId() {
+    // Extraire l'ID du jeu depuis l'URL
+    const path = window.location.pathname;
+    const match = path.match(/\/(\d{2}_[^/]+)\//);
+    if (match) {
+      return match[1];
+    }
+    // Fallback: essayer depuis le chemin du fichier
+    if (this.gameJsPath) {
+      const pathMatch = this.gameJsPath.match(/(\d{2}_[^/]+)/);
+      if (pathMatch) {
+        return pathMatch[1];
+      }
+    }
+    return null;
+  }
+
   async init() {
+    // Initialiser le validateur
+    if (window.CodeValidator) {
+      this.validator = new window.CodeValidator();
+    }
+
     // Initialiser CodeMirror si disponible
     if (window.CodeMirror) {
       this.initCodeMirror();
@@ -180,10 +204,85 @@ class Terminal {
         this.showOutput('Code exécuté avec succès', 'success');
       }
 
+      // Valider le code après exécution
+      this.validateCode(code);
+
     } catch (error) {
       this.showOutput(`Erreur: ${error.message}`, 'error');
       console.error('Erreur d\'exécution:', error);
+      
+      // Valider quand même (pour détecter les erreurs de syntaxe)
+      this.validateCode(code);
     }
+  }
+
+  validateCode(code) {
+    if (!this.validator || !this.gameId) {
+      return;
+    }
+
+    try {
+      const result = this.validator.validate(this.gameId, code);
+      this.updateValidationUI(result);
+    } catch (error) {
+      console.error('Erreur lors de la validation:', error);
+    }
+  }
+
+  updateValidationUI(result) {
+    const panel = document.getElementById('validation-panel');
+    const statusDiv = document.getElementById('validation-status');
+    const testsList = document.getElementById('validation-tests');
+
+    if (!panel || !statusDiv || !testsList) {
+      return;
+    }
+
+    // Afficher le panneau
+    panel.style.display = 'block';
+
+    // Mettre à jour le statut global
+    const passedCount = result.tests.filter(t => t.passed).length;
+    const totalCount = result.tests.length;
+
+    statusDiv.className = 'validation-status';
+    if (result.allPassed) {
+      statusDiv.className += ' all-passed';
+      statusDiv.textContent = `✅ Tous les tests passent (${totalCount}/${totalCount})`;
+    } else if (passedCount > 0) {
+      statusDiv.className += ' some-failed';
+      statusDiv.textContent = `⚠️ ${passedCount}/${totalCount} tests passent`;
+    } else {
+      statusDiv.className += ' all-failed';
+      statusDiv.textContent = `❌ Aucun test ne passe (0/${totalCount})`;
+    }
+
+    // Mettre à jour la liste des tests
+    testsList.innerHTML = '';
+    result.tests.forEach(test => {
+      const li = document.createElement('li');
+      li.className = `test-item ${test.passed ? 'test-passed' : 'test-failed'}`;
+
+      const icon = document.createElement('span');
+      icon.className = 'test-icon';
+      icon.textContent = test.passed ? '✓' : '✗';
+
+      const name = document.createElement('span');
+      name.className = 'test-name';
+      name.textContent = test.name;
+
+      li.appendChild(icon);
+      li.appendChild(name);
+
+      if (!test.passed && test.message) {
+        const message = document.createElement('span');
+        message.className = 'test-message';
+        message.textContent = test.message;
+        li.appendChild(message);
+      }
+
+      testsList.appendChild(li);
+    });
   }
 
   formatOutput(value) {
