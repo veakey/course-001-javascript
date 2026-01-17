@@ -8,14 +8,32 @@ let inventaire = [];
 
 // Fonction pour ajouter un item à l'inventaire
 function ajouterItem(nom, type, quantite = 1) {
-  const item = {
-    nom: String(nom),
-    type: String(type),
-    quantite: Number(quantite)
-  };
-  inventaire.push(item);
+  const nomStr = String(nom);
+  const typeStr = String(type);
+  const quantiteNum = Number(quantite);
+  
+  // Chercher si un item avec le même nom et type existe déjà
+  const itemExistant = inventaire.find(item => 
+    item.nom === nomStr && item.type === typeStr
+  );
+  
+  if (itemExistant) {
+    // Si l'item existe déjà, additionner les quantités
+    itemExistant.quantite += quantiteNum;
+    console.log(`Quantité mise à jour: ${nomStr} (${typeStr}) x${itemExistant.quantite} (${quantiteNum} ajouté)`);
+  } else {
+    // Sinon, ajouter un nouvel item
+    const item = {
+      nom: nomStr,
+      type: typeStr,
+      quantite: quantiteNum
+    };
+    inventaire.push(item);
+    console.log(`Item ajouté: ${item.nom} (${item.type}) x${item.quantite}`);
+  }
+  
+  // Mettre à jour l'UI
   afficherInventaire();
-  console.log(`Item ajouté: ${item.nom} (${item.type}) x${item.quantite}`);
 }
 
 // Fonction pour afficher l'inventaire
