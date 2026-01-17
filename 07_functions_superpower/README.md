@@ -34,7 +34,20 @@ function dessinerChat() {
 }
 ```
 
-**Explication :** L'ordre de dessin est important en canvas. Les éléments dessinés en premier sont recouverts par ceux dessinés après. Pour que le chat soit bien dessiné, il faut dessiner dans l'ordre logique : tête, corps, puis les détails (oreilles, yeux, nez, bouche), et enfin les pattes et la queue.
+**Explication :** L'ordre de dessin est important en canvas. Les éléments dessinés en premier sont recouverts par ceux dessinés après. Pour que le chat soit bien dessiné, il faut dessiner dans l'ordre logique :
+1. **dessinerTete** - La base de la tête
+2. **dessinerCorps** - Le corps sous la tête
+3. **dessinerOreilles** - Les oreilles sur la tête
+4. **dessinerYeux** - Les yeux sur la tête
+5. **dessinerNez** - Le nez sur la tête
+6. **dessinerBouche** - La bouche sur la tête
+7. **dessinerPattes** - Les pattes sous le corps
+8. **dessinerQueue** - La queue à côté du corps
+
+**Ordre attendu exact :**
+```
+dessinerTete → dessinerCorps → dessinerOreilles → dessinerYeux → dessinerNez → dessinerBouche → dessinerPattes → dessinerQueue
+```
 
 ### Bug 2 : Guillemet manquant
 

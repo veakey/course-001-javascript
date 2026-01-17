@@ -511,13 +511,56 @@ class CodeValidator {
       return { allPassed: false, tests };
     }
 
-    // Test 2: Ordre des appels dans dessinerChat - tête avant corps
-    const teteAvantCorps = code.match(/dessinerTete\([^)]*\)[\s\S]*?dessinerCorps\(/);
-    tests.push({
-      name: 'Ordre des dessins correct',
-      passed: teteAvantCorps !== null,
-      message: teteAvantCorps ? '' : 'La fonction dessinerTete() doit être appelée avant dessinerCorps() pour un meilleur rendu visuel'
-    });
+    // Test 2: Ordre des appels dans dessinerChat
+    // Ordre correct attendu : tête d'abord, puis corps, puis détails de la tête, puis pattes et queue
+    const ordreCorrect = [
+      'dessinerTete',
+      'dessinerCorps',
+      'dessinerOreilles',
+      'dessinerYeux',
+      'dessinerNez',
+      'dessinerBouche',
+      'dessinerPattes',
+      'dessinerQueue'
+    ];
+    
+    // Extraire la fonction dessinerChat
+    const dessinerChatMatch = code.match(/function\s+dessinerChat\s*\([^)]*\)\s*\{([\s\S]*?)\}/);
+    if (!dessinerChatMatch) {
+      tests.push({
+        name: 'Ordre des dessins correct',
+        passed: false,
+        message: 'La fonction dessinerChat() est introuvable'
+      });
+    } else {
+      const dessinerChatBody = dessinerChatMatch[1];
+      
+      // Extraire tous les appels de fonctions dessiner* dans l'ordre
+      const appelsRegex = /dessiner(Tete|Oreilles|Yeux|Nez|Bouche|Corps|Pattes|Queue)\s*\(/g;
+      const appelsTrouves = [];
+      let match;
+      while ((match = appelsRegex.exec(dessinerChatBody)) !== null) {
+        appelsTrouves.push('dessiner' + match[1]);
+      }
+      
+      // Comparer avec l'ordre correct
+      const ordreCorrectStr = ordreCorrect.join(' → ');
+      const ordreTrouveStr = appelsTrouves.join(' → ');
+      
+      // Vérifier si l'ordre est correct
+      const ordreCorrectBool = appelsTrouves.length === ordreCorrect.length &&
+        appelsTrouves.every((appel, index) => appel === ordreCorrect[index]);
+      
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/fa4766f7-5e1c-455a-ba2a-bc2044abe366',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'validator.js:validateFunctions:ordre',message:'Checking function order',data:{ordreCorrect,appelsTrouves,ordreCorrectBool},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
+      // #endregion
+      
+      tests.push({
+        name: 'Ordre des dessins correct',
+        passed: ordreCorrectBool,
+        message: ordreCorrectBool ? '' : `L'ordre des appels n'est pas correct. Ordre attendu: ${ordreCorrectStr}. Ordre trouvé: ${ordreTrouveStr || 'Aucun appel trouvé'}`
+      });
+    }
 
     const allPassed = tests.every(t => t.passed);
     return { allPassed, tests };
