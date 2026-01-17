@@ -1,0 +1,63 @@
+# RÈGLES CURSOR - SYSTÈME DE MÉMOIRE
+
+## LECTURE OBLIGATOIRE AVANT CHAQUE RÉPONSE
+
+1. **TOUJOURS lire le fichier `jumon/brainstorming_prompt_improved.md` en ENTIER avant de répondre à l'utilisateur**
+   - Ce fichier contient les instructions système critiques pour le mode co-pensée
+   - Aucune exception permise - cette lecture est la première action à effectuer
+
+## GESTION DE LA MÉMOIRE
+
+### Fichiers de mémoire à maintenir
+
+1. **`jumon/intentions.md`** - Objectifs du projet
+   - Mettre à jour après chaque échange si de nouveaux objectifs sont exprimés
+   - Incrémenter le numéro de version [#n] pour chaque nouvelle intention
+
+2. **`jumon/actions_tracking.md`** - Actions réalisées
+   - Mettre à jour après chaque action complétée
+   - Incrémenter le numéro de version [#n] pour chaque nouvelle action
+
+3. **`jumon/past_interactions.md`** - Historique des échanges
+   - Mettre à jour après chaque interaction significative
+   - Incrémenter le numéro de version [#n] pour chaque nouvelle interaction
+
+### Mémoire à court terme
+
+4. **`jumon/short_memory.md`** - Tâche en cours
+   - CRÉER ce fichier au début de chaque nouvelle tâche
+   - Y noter les éléments contextuels de la tâche en cours
+   - VIDER ce fichier une fois la tâche complétée
+   - Après vidage, ajouter une ligne de commentaire dans `jumon/long_memory.md` (ou créer ce fichier s'il n'existe pas) qui résume ce que la tâche était censée accomplir
+
+### Format de mise à jour
+
+- Toujours incrémenter les numéros de version dans les fichiers modifiés
+- Conserver l'historique des versions précédentes
+- Demander validation avant toute modification de la mémoire
+
+## SÉQUENCE D'EXÉCUTION
+
+1. Lire `jumon/brainstorming_prompt_improved.md` (OBLIGATOIRE)
+2. Lire les fichiers de mémoire existants (`intentions.md`, `actions_tracking.md`, `past_interactions.md`)
+3. Vérifier si `jumon/short_memory.md` existe et le lire si présent
+4. Traiter la requête de l'utilisateur
+5. Mettre à jour les fichiers de mémoire si nécessaire
+6. Gérer `short_memory.md` :
+   - Créer si nouvelle tâche
+   - Mettre à jour pendant la tâche
+   - Vider et archiver dans `long_memory.md` à la fin de la tâche
+
+## RÈGLES DE COMPORTEMENT
+
+- Toujours consulter la mémoire avant de répondre
+- Maintenir la cohérence entre tous les fichiers de mémoire
+- Ne jamais supprimer l'historique, seulement ajouter de nouvelles versions
+- Archiver proprement les tâches complétées dans `long_memory.md`
+
+## VÉRIFICATION DU LINT
+
+- **TOUJOURS vérifier les erreurs de lint après chaque création ou modification de fichier**
+- Utiliser l'outil `read_lints` pour chaque fichier modifié/créé immédiatement après l'édition
+- Corriger automatiquement toutes les erreurs de lint détectées si la solution est évidente
+- Ne jamais laisser de fichier avec des erreurs de lint non corrigées
