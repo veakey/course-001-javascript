@@ -7,6 +7,12 @@ const wordDisplay = document.getElementById('word-display');
 const lettersUsedDiv = document.getElementById('letters-used');
 const letterInput = document.getElementById('letter-input');
 const submitLetterBtn = document.getElementById('submit-letter');
+const gameMessage = document.getElementById('game-message');
+const wordSelectionContainer = document.getElementById('word-selection-container');
+const gameControlsContainer = document.getElementById('game-controls-container');
+const wordInput = document.getElementById('word-input');
+const startGameBtn = document.getElementById('start-game-btn');
+const newGameBtn = document.getElementById('new-game-btn');
 
 // État du jeu
 let motSecret = '';
@@ -19,6 +25,43 @@ let partieEnCours = false;
 // Liste de mots
 const mots = ['JAVASCRIPT', 'PROGRAMMATION', 'DEVELOPPEUR', 'ALGORITHME', 'FONCTION', 'VARIABLE', 'BOUCLE', 'TABLEAU'];
 
+// Fonction pour afficher un message de feedback
+function afficherMessage(message, type = 'info') {
+  if (gameMessage) {
+    gameMessage.textContent = message;
+    gameMessage.style.display = 'block';
+    
+    // Couleurs selon le type
+    if (type === 'victoire') {
+      gameMessage.style.color = '#4ade80'; // Vert
+    } else if (type === 'defaite') {
+      gameMessage.style.color = '#f87171'; // Rouge
+    } else {
+      gameMessage.style.color = 'var(--text-primary)';
+    }
+  }
+}
+
+// Fonction pour cacher le message
+function cacherMessage() {
+  if (gameMessage) {
+    gameMessage.style.display = 'none';
+    gameMessage.textContent = '';
+  }
+}
+
+// Fonction pour afficher/masquer les contrôles
+function afficherControlesJeu() {
+  if (wordSelectionContainer) wordSelectionContainer.style.display = 'none';
+  if (gameControlsContainer) gameControlsContainer.style.display = 'flex';
+}
+
+function afficherSelectionMot() {
+  if (wordSelectionContainer) wordSelectionContainer.style.display = 'flex';
+  if (gameControlsContainer) gameControlsContainer.style.display = 'none';
+  if (wordInput) wordInput.value = '';
+}
+
 // Fonction pour démarrer une nouvelle partie
 function nouvellePartie(mot = null) {
   if (mot) {
@@ -30,6 +73,8 @@ function nouvellePartie(mot = null) {
   lettresUtilisees = [];
   erreurs = 0;
   partieEnCours = true;
+  cacherMessage();
+  afficherControlesJeu();
   dessinerPendu();
   afficherMot();
   afficherLettresUtilisees();
@@ -75,6 +120,7 @@ function proposerLettre(lettre) {
     
     if (motAffiche === motSecret) {
       partieEnCours = false;
+      afficherMessage('🎉 Félicitations! Vous avez gagné! 🎉', 'victoire');
       console.log('Félicitations! Vous avez gagné!');
     }
   } else {
@@ -85,6 +131,7 @@ function proposerLettre(lettre) {
     
     if (erreurs >= maxErreurs) {
       partieEnCours = false;
+      afficherMessage(`😢 Perdu! Le mot était: ${motSecret}`, 'defaite');
       console.log(`Perdu! Le mot était: ${motSecret}`);
     }
   }
@@ -198,28 +245,42 @@ function dessinerPendu() {
   }
 }
 
-// Gestion de l'input utilisateur
-submitLetterBtn.addEventListener('click', () => {
-  const lettre = letterInput.value.trim();
-  if (lettre) {
-    proposerLettre(lettre);
-    letterInput.value = '';
-    letterInput.focus();
-  }
-});
+// Exposer les fonctions globalement pour le bouton et l'initialisation
+window.proposerLettre = proposerLettre;
+window.nouvellePartie = nouvellePartie;
+window.afficherSelectionMot = afficherSelectionMot;
 
-letterInput.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') {
-    submitLetterBtn.click();
-  }
-});
+// Gestionnaires d'événements pour les boutons
+if (startGameBtn && wordInput) {
+  startGameBtn.addEventListener('click', () => {
+    const mot = wordInput.value.trim();
+    if (mot && mot.length > 0) {
+      nouvellePartie(mot);
+    } else {
+      nouvellePartie(); // Mot aléatoire si vide
+    }
+  });
 
-letterInput.addEventListener('input', (e) => {
-  e.target.value = e.target.value.toUpperCase().replace(/[^A-Z]/g, '');
-});
+  wordInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      startGameBtn.click();
+    }
+  });
+
+  wordInput.addEventListener('input', (e) => {
+    e.target.value = e.target.value.toUpperCase().replace(/[^A-Z]/g, '');
+  });
+}
+
+if (newGameBtn) {
+  newGameBtn.addEventListener('click', () => {
+    afficherSelectionMot();
+  });
+}
 
 // Initialisation
 dessinerPendu();
+afficherSelectionMot(); // Afficher la sélection de mot au démarrage
 console.log('=== Le Pendu ===');
 console.log('');
 console.log('Fonctions disponibles:');

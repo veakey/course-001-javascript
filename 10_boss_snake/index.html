@@ -58,8 +58,9 @@ const tileCount = canvas.width / gridSize;
 // État du jeu
 let snake = [{ x: 10, y: 10 }];
 let direction = { x: 0, y: 0 };
-let food = { x: 15, y: 15 };
+let food = { x: 15, y: 15, type: 'blue' }; // 'blue': +1, 'green': +2, 'red': game over
 let score = 0;
+let nourrituresMangees = 0; // Compteur de nourritures mangées
 let highScore = localStorage.getItem('snakeHighScore') || 0;
 let gameRunning = false;
 let gamePaused = false;
@@ -79,6 +80,16 @@ function genererNourriture() {
       genererNourriture();
       return;
     }
+  }
+  
+  // Choisir un type de nourriture aléatoire
+  const rand = Math.random();
+  if (rand < 0.1) {
+    food.type = 'red'; // 10% - Game over
+  } else if (rand < 0.4) {
+    food.type = 'green'; // 30% - Grandir de 2
+  } else {
+    food.type = 'blue'; // 60% - Grandir de 1
   }
 }
 
@@ -102,9 +113,15 @@ function dessiner() {
     ctx.stroke();
   }
   
-  // Dessiner la nourriture
-  ctx.fillStyle = '#ff6b6b';
-  ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize - 2, gridSize - 2);
+  // Dessiner la nourriture selon son type
+  if (food.type === 'red') {
+    ctx.fillStyle = '#ff6b6b';
+  } else if (food.type === 'green') {
+    ctx.fillStyle = '#51cf66';
+  } else {
+    ctx.fillStyle = '#4a9eff'; // blue
+  }
+  ctx.fillRect(food.x * gridSize + 1, food.y * gridSize + 1, gridSize - 2, gridSize - 2);
   
   // Dessiner le serpent
   snake.forEach((segment, index) => {
@@ -115,7 +132,7 @@ function dessiner() {
       // Corps
       ctx.fillStyle = '#6bb3ff';
     }
-    ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize - 2, gridSize - 2);
+    ctx.fillRect(segment.x * gridSize + 1, segment.y * gridSize + 1, gridSize - 2, gridSize - 2);
   });
 }
 
@@ -129,6 +146,7 @@ function mettreAJour() {
   // Vérifier les collisions avec les murs
   if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
     finPartie();
+    dessiner(); // Dessiner une dernière fois pour afficher l'état final
     return;
   }
   
@@ -136,14 +154,32 @@ function mettreAJour() {
   for (let i = 1; i < snake.length; i++) {
     if (head.x === snake[i].x && head.y === snake[i].y) {
       finPartie();
+      dessiner(); // Dessiner une dernière fois pour afficher l'état final
       return;
     }
   }
   
-  snake.unshift(head);
-  
-  // Vérifier si le serpent mange la nourriture
+  // Vérifier si le serpent mange la nourriture AVANT d'ajouter la tête
   if (head.x === food.x && head.y === food.y) {
+    // Rouge = game over
+    if (food.type === 'red') {
+      finPartie();
+      dessiner(); // Dessiner une dernière fois pour afficher l'état final
+      return;
+    }
+    
+    // Ajouter la tête
+    snake.unshift(head);
+    
+    // Vert = grandir de 2, Bleu = grandir de 1
+    const croissance = food.type === 'green' ? 2 : 1;
+    
+    // Ajouter les segments supplémentaires
+    for (let i = 0; i < croissance - 1; i++) {
+      snake.unshift(head);
+    }
+    
+    nourrituresMangees++;
     score++;
     scoreDisplay.textContent = score;
     if (score > highScore) {
@@ -153,8 +189,21 @@ function mettreAJour() {
     }
     genererNourriture();
   } else {
+    // Ajouter la tête et retirer la queue
+    snake.unshift(head);
     snake.pop();
+    
+    // Score augmente à chaque mouvement
+    score++;
+    scoreDisplay.textContent = score;
+    if (score > highScore) {
+      highScore = score;
+      highScoreDisplay.textContent = highScore;
+      localStorage.setItem('snakeHighScore', highScore);
+    }
   }
+  
+  // Ne pas appeler dessiner() ici, il sera appelé dans la boucle requestAnimationFrame
   
   dessiner();
 }
@@ -166,6 +215,7 @@ function demarrer() {
   snake = [{ x: 10, y: 10 }];
   direction = { x: 0, y: 0 };
   score = 0;
+  nourrituresMangees = 0;
   scoreDisplay.textContent = score;
   gameRunning = true;
   gamePaused = false;
@@ -173,7 +223,33 @@ function demarrer() {
   genererNourriture();
   dessiner();
   
-  gameLoop = setInterval(mettreAJour, 150);
+  // Utiliser requestAnimationFrame pour un rendu fluide sans scintillement
+  let lastTime = 0;
+  const gameSpeed = 150; // ms entre chaque mise à jour
+  
+  function gameLoop(currentTime) {
+    if (!gameRunning) {
+      // Si le jeu est terminé, dessiner une dernière fois puis arrêter
+      dessiner();
+      return;
+    }
+    
+    if (currentTime - lastTime >= gameSpeed) {
+      mettreAJour();
+      lastTime = currentTime;
+    }
+    
+    // Toujours redessiner pour un rendu fluide (sauf si gameRunning est devenu false dans mettreAJour)
+    if (gameRunning) {
+      dessiner();
+    }
+    
+    if (gameRunning) {
+      requestAnimationFrame(gameLoop);
+    }
+  }
+  
+  requestAnimationFrame(gameLoop);
   console.log('Jeu démarré! Utilisez les flèches pour contrôler le serpent.');
 }
 
@@ -189,10 +265,11 @@ function pause() {
 function finPartie() {
   gameRunning = false;
   gamePaused = false;
-  clearInterval(gameLoop);
+  // Plus besoin de clearInterval car on utilise requestAnimationFrame
+  gameLoop = null;
   gameOverDiv.style.display = 'block';
   pauseBtn.textContent = 'Pause';
-  console.log(`Partie terminée! Score: ${score}`);
+  console.log(`Partie terminée! Score: ${score} (Mouvements: ${score - nourrituresMangees}, Nourritures: ${nourrituresMangees})`);
 }
 
 // Fonction pour rejouer
@@ -243,7 +320,10 @@ console.log('  - Flèches: Déplacer le serpent');
 console.log('  - Démarrer: Commence une nouvelle partie');
 console.log('  - Pause: Met en pause/reprend le jeu');
 console.log('');
-console.log('Objectif: Mangez la nourriture rouge pour grandir et augmenter votre score!');
+console.log('Objectif: Mangez la nourriture pour grandir et augmenter votre score!');
+console.log('  - Bleu: Grandir de 1 segment');
+console.log('  - Vert: Grandir de 2 segments');
+console.log('  - Rouge: Game Over! Évitez-le!');
 console.log('Évitez les murs et votre propre corps!');
   </script>
   <script src="../shared/js/terminal.js"></script>

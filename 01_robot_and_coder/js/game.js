@@ -15,75 +15,107 @@ let robotGridY = Math.floor(tileCountY / 2);
 let robotAngle = 0; // Angle en degrés (0 = vers la droite)
 const robotSize = 30;
 
-// Fonctions de mouvement
+// Queue d'instructions pour l'animation
+let instructionQueue = [];
+let isExecuting = false;
+const DELAY_MS = 100;
+
+// Fonction pour exécuter la queue d'instructions avec délai
+async function executerQueue() {
+  if (isExecuting) return;
+  isExecuting = true;
+  
+  while (instructionQueue.length > 0) {
+    const instruction = instructionQueue.shift();
+    instruction();
+    dessiner();
+    await new Promise(resolve => setTimeout(resolve, DELAY_MS));
+  }
+  
+  isExecuting = false;
+}
+
+// Fonctions de mouvement (ajoutent à la queue)
 function avancer() {
-  // Calculer la direction de déplacement selon l'angle
-  let deltaX = 0;
-  let deltaY = 0;
+  instructionQueue.push(() => {
+    // Calculer la direction de déplacement selon l'angle
+    let deltaX = 0;
+    let deltaY = 0;
+    
+    if (robotAngle === 0) {
+      deltaX = 1; // Droite
+    } else if (robotAngle === 90 || robotAngle === -270) {
+      deltaY = 1; // Bas
+    } else if (robotAngle === 180 || robotAngle === -180) {
+      deltaX = -1; // Gauche
+    } else if (robotAngle === 270 || robotAngle === -90) {
+      deltaY = -1; // Haut
+    }
+    
+    // Déplacer d'une case dans la grille
+    const newX = robotGridX + deltaX;
+    const newY = robotGridY + deltaY;
+    
+    // Vérifier les limites
+    if (newX >= 0 && newX < tileCountX && newY >= 0 && newY < tileCountY) {
+      robotGridX = newX;
+      robotGridY = newY;
+    }
+    
+    console.log(`Robot avance. Position grille: (${robotGridX}, ${robotGridY})`);
+  });
   
-  if (robotAngle === 0) {
-    deltaX = 1; // Droite
-  } else if (robotAngle === 90 || robotAngle === -270) {
-    deltaY = -1; // Haut
-  } else if (robotAngle === 180 || robotAngle === -180) {
-    deltaX = -1; // Gauche
-  } else if (robotAngle === 270 || robotAngle === -90) {
-    deltaY = 1; // Bas
-  }
-  
-  // Déplacer d'une case dans la grille
-  const newX = robotGridX + deltaX;
-  const newY = robotGridY + deltaY;
-  
-  // Vérifier les limites
-  if (newX >= 0 && newX < tileCountX && newY >= 0 && newY < tileCountY) {
-    robotGridX = newX;
-    robotGridY = newY;
-  }
-  
-  dessiner();
-  console.log(`Robot avance. Position grille: (${robotGridX}, ${robotGridY})`);
+  executerQueue();
 }
 
 function reculer() {
-  // Calculer la direction de déplacement inverse selon l'angle
-  let deltaX = 0;
-  let deltaY = 0;
+  instructionQueue.push(() => {
+    // Calculer la direction de déplacement inverse selon l'angle
+    let deltaX = 0;
+    let deltaY = 0;
+    
+    if (robotAngle === 0) {
+      deltaX = -1; // Gauche
+    } else if (robotAngle === 90 || robotAngle === -270) {
+      deltaY = -1; // Haut
+    } else if (robotAngle === 180 || robotAngle === -180) {
+      deltaX = 1; // Droite
+    } else if (robotAngle === 270 || robotAngle === -90) {
+      deltaY = 1; // Bas
+    }
+    
+    // Déplacer d'une case dans la grille
+    const newX = robotGridX + deltaX;
+    const newY = robotGridY + deltaY;
+    
+    // Vérifier les limites
+    if (newX >= 0 && newX < tileCountX && newY >= 0 && newY < tileCountY) {
+      robotGridX = newX;
+      robotGridY = newY;
+    }
+    
+    console.log(`Robot recule. Position grille: (${robotGridX}, ${robotGridY})`);
+  });
   
-  if (robotAngle === 0) {
-    deltaX = -1; // Gauche
-  } else if (robotAngle === 90 || robotAngle === -270) {
-    deltaY = 1; // Bas
-  } else if (robotAngle === 180 || robotAngle === -180) {
-    deltaX = 1; // Droite
-  } else if (robotAngle === 270 || robotAngle === -90) {
-    deltaY = -1; // Haut
-  }
-  
-  // Déplacer d'une case dans la grille
-  const newX = robotGridX + deltaX;
-  const newY = robotGridY + deltaY;
-  
-  // Vérifier les limites
-  if (newX >= 0 && newX < tileCountX && newY >= 0 && newY < tileCountY) {
-    robotGridX = newX;
-    robotGridY = newY;
-  }
-  
-  dessiner();
-  console.log(`Robot recule. Position grille: (${robotGridX}, ${robotGridY})`);
+  executerQueue();
 }
 
 function tournerGauche() {
-  robotAngle -= 90;
-  dessiner();
-  console.log(`Robot tourne à gauche. Angle: ${robotAngle}°`);
+  instructionQueue.push(() => {
+    robotAngle -= 90;
+    console.log(`Robot tourne à gauche. Angle: ${robotAngle}°`);
+  });
+  
+  executerQueue();
 }
 
 function tournerDroite() {
-  robotAngle += 90;
-  dessiner();
-  console.log(`Robot tourne à droite. Angle: ${robotAngle}°`);
+  instructionQueue.push(() => {
+    robotAngle += 90;
+    console.log(`Robot tourne à droite. Angle: ${robotAngle}°`);
+  });
+  
+  executerQueue();
 }
 
 function dessiner() {

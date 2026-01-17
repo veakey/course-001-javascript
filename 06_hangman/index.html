@@ -25,10 +25,18 @@
       <h2 style="margin-bottom: 16px; color: var(--text-primary);">Le Pendu</h2>
       <canvas id="game-canvas" width="400" height="500"></canvas>
       <div id="word-display" style="text-align: center; font-size: 32px; letter-spacing: 8px; margin: 16px 0; color: var(--text-primary); font-weight: bold;"></div>
+      <div id="game-message" style="text-align: center; font-size: 24px; font-weight: bold; margin: 16px 0; min-height: 32px; display: none;"></div>
       <div id="letters-used" style="text-align: center; color: var(--text-secondary); margin-top: 16px;"></div>
-      <div style="margin-top: 16px; display: flex; gap: 8px; align-items: center; justify-content: center;">
-        <input type="text" id="letter-input" class="glass-input" placeholder="Entrez une lettre..." style="width: 200px; text-align: center; text-transform: uppercase;" maxlength="1">
-        <button id="submit-letter" class="glass-button primary">Proposer</button>
+      <div id="word-selection-container" style="margin-top: 16px; display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap;">
+        <input type="text" id="word-input" class="glass-input" placeholder="Choisissez un mot à faire deviner..." style="width: 250px; text-align: center; text-transform: uppercase;">
+        <button id="start-game-btn" class="glass-button primary">Démarrer</button>
+      </div>
+      <div id="game-controls-container" style="margin-top: 16px; display: none; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap;">
+        <div style="display: flex; gap: 8px; align-items: center; justify-content: center;">
+          <input type="text" id="letter-input" class="glass-input" placeholder="Entrez une lettre..." style="width: 200px; text-align: center; text-transform: uppercase;" maxlength="1">
+          <button id="submit-letter" class="glass-button primary">Proposer</button>
+        </div>
+        <button id="new-game-btn" class="glass-button" style="margin-top: 8px;">Nouvelle partie</button>
       </div>
     </div>
   </div>
@@ -42,6 +50,12 @@ const wordDisplay = document.getElementById('word-display');
 const lettersUsedDiv = document.getElementById('letters-used');
 const letterInput = document.getElementById('letter-input');
 const submitLetterBtn = document.getElementById('submit-letter');
+const gameMessage = document.getElementById('game-message');
+const wordSelectionContainer = document.getElementById('word-selection-container');
+const gameControlsContainer = document.getElementById('game-controls-container');
+const wordInput = document.getElementById('word-input');
+const startGameBtn = document.getElementById('start-game-btn');
+const newGameBtn = document.getElementById('new-game-btn');
 
 // État du jeu
 let motSecret = '';
@@ -54,6 +68,43 @@ let partieEnCours = false;
 // Liste de mots
 const mots = ['JAVASCRIPT', 'PROGRAMMATION', 'DEVELOPPEUR', 'ALGORITHME', 'FONCTION', 'VARIABLE', 'BOUCLE', 'TABLEAU'];
 
+// Fonction pour afficher un message de feedback
+function afficherMessage(message, type = 'info') {
+  if (gameMessage) {
+    gameMessage.textContent = message;
+    gameMessage.style.display = 'block';
+    
+    // Couleurs selon le type
+    if (type === 'victoire') {
+      gameMessage.style.color = '#4ade80'; // Vert
+    } else if (type === 'defaite') {
+      gameMessage.style.color = '#f87171'; // Rouge
+    } else {
+      gameMessage.style.color = 'var(--text-primary)';
+    }
+  }
+}
+
+// Fonction pour cacher le message
+function cacherMessage() {
+  if (gameMessage) {
+    gameMessage.style.display = 'none';
+    gameMessage.textContent = '';
+  }
+}
+
+// Fonction pour afficher/masquer les contrôles
+function afficherControlesJeu() {
+  if (wordSelectionContainer) wordSelectionContainer.style.display = 'none';
+  if (gameControlsContainer) gameControlsContainer.style.display = 'flex';
+}
+
+function afficherSelectionMot() {
+  if (wordSelectionContainer) wordSelectionContainer.style.display = 'flex';
+  if (gameControlsContainer) gameControlsContainer.style.display = 'none';
+  if (wordInput) wordInput.value = '';
+}
+
 // Fonction pour démarrer une nouvelle partie
 function nouvellePartie(mot = null) {
   if (mot) {
@@ -65,6 +116,8 @@ function nouvellePartie(mot = null) {
   lettresUtilisees = [];
   erreurs = 0;
   partieEnCours = true;
+  cacherMessage();
+  afficherControlesJeu();
   dessinerPendu();
   afficherMot();
   afficherLettresUtilisees();
@@ -110,6 +163,7 @@ function proposerLettre(lettre) {
     
     if (motAffiche === motSecret) {
       partieEnCours = false;
+      afficherMessage('🎉 Félicitations! Vous avez gagné! 🎉', 'victoire');
       console.log('Félicitations! Vous avez gagné!');
     }
   } else {
@@ -120,6 +174,7 @@ function proposerLettre(lettre) {
     
     if (erreurs >= maxErreurs) {
       partieEnCours = false;
+      afficherMessage(`😢 Perdu! Le mot était: ${motSecret}`, 'defaite');
       console.log(`Perdu! Le mot était: ${motSecret}`);
     }
   }
@@ -233,28 +288,42 @@ function dessinerPendu() {
   }
 }
 
-// Gestion de l'input utilisateur
-submitLetterBtn.addEventListener('click', () => {
-  const lettre = letterInput.value.trim();
-  if (lettre) {
-    proposerLettre(lettre);
-    letterInput.value = '';
-    letterInput.focus();
-  }
-});
+// Exposer les fonctions globalement pour le bouton et l'initialisation
+window.proposerLettre = proposerLettre;
+window.nouvellePartie = nouvellePartie;
+window.afficherSelectionMot = afficherSelectionMot;
 
-letterInput.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') {
-    submitLetterBtn.click();
-  }
-});
+// Gestionnaires d'événements pour les boutons
+if (startGameBtn && wordInput) {
+  startGameBtn.addEventListener('click', () => {
+    const mot = wordInput.value.trim();
+    if (mot && mot.length > 0) {
+      nouvellePartie(mot);
+    } else {
+      nouvellePartie(); // Mot aléatoire si vide
+    }
+  });
 
-letterInput.addEventListener('input', (e) => {
-  e.target.value = e.target.value.toUpperCase().replace(/[^A-Z]/g, '');
-});
+  wordInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      startGameBtn.click();
+    }
+  });
+
+  wordInput.addEventListener('input', (e) => {
+    e.target.value = e.target.value.toUpperCase().replace(/[^A-Z]/g, '');
+  });
+}
+
+if (newGameBtn) {
+  newGameBtn.addEventListener('click', () => {
+    afficherSelectionMot();
+  });
+}
 
 // Initialisation
 dessinerPendu();
+afficherSelectionMot(); // Afficher la sélection de mot au démarrage
 console.log('=== Le Pendu ===');
 console.log('');
 console.log('Fonctions disponibles:');
@@ -275,6 +344,42 @@ console.log('  proposerLettre("A");');
       const output = document.getElementById('output');
       if (codeEditor && executeBtn && output) {
         window.terminal = new Terminal('code-editor', 'execute-btn', 'output', gameJsPath);
+        
+        // Exécuter automatiquement le code au chargement pour que les fonctions soient disponibles
+        setTimeout(() => {
+          if (window.terminal && window.terminal.execute) {
+            window.terminal.execute();
+            // Afficher la sélection de mot au démarrage
+            if (window.afficherSelectionMot) {
+              window.afficherSelectionMot();
+            }
+          }
+        }, 500);
+      }
+
+      // Gestion de l'input utilisateur pour le Pendu
+      const letterInput = document.getElementById('letter-input');
+      const submitLetterBtn = document.getElementById('submit-letter');
+      
+      if (letterInput && submitLetterBtn) {
+        submitLetterBtn.addEventListener('click', () => {
+          const lettre = letterInput.value.trim();
+          if (lettre && window.proposerLettre) {
+            window.proposerLettre(lettre);
+            letterInput.value = '';
+            letterInput.focus();
+          }
+        });
+
+        letterInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            submitLetterBtn.click();
+          }
+        });
+
+        letterInput.addEventListener('input', (e) => {
+          e.target.value = e.target.value.toUpperCase().replace(/[^A-Z]/g, '');
+        });
       }
     });
   </script>

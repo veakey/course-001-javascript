@@ -15,19 +15,19 @@
 
 .item-name {
   font-weight: bold;
-  color: var(--text-primary);
+  color: #ffffff;
   margin-bottom: 8px;
   font-size: 16px;
 }
 
 .item-type {
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.7);
   font-size: 12px;
   margin-bottom: 4px;
 }
 
 .item-quantity {
-  color: #4a9eff;
+  color: #6bb3ff;
   font-size: 14px;
   font-weight: 600;
 }
