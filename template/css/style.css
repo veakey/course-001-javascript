@@ -1,14 +1,3 @@
-#game-canvas {
-  width: 100%;
-  max-width: 400px;
-  height: auto;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.2);
-  display: block;
-  margin: 0 auto;
-}
-
 /* Mode expand : panneau code en plein écran */
 .container.code-expanded .game-panel {
   display: none;

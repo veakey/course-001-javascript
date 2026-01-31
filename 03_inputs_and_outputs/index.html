@@ -17,7 +17,10 @@
 <body>
   <div class="container">
     <div class="terminal-panel glass-panel">
-      <h2 style="margin-bottom: 16px; color: var(--text-primary);">Terminal</h2>
+      <div class="terminal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h2 style="margin: 0; color: var(--text-primary);">Terminal</h2>
+        <button id="code-expand-btn" class="glass-button" type="button" title="Agrandir le panneau code">Agrandir</button>
+      </div>
       <div id="code-editor"></div>
       <button id="execute-btn" class="glass-button primary">Exécuter</button>
       <div id="output" class="glass-panel" style="margin-top: 16px; padding: 16px;"></div>
@@ -123,6 +126,19 @@ console.log('  afficher("Bonjour " + nom + " !");');
       const output = document.getElementById('output');
       if (codeEditor && executeBtn && output) {
         window.terminal = new Terminal('code-editor', 'execute-btn', 'output', gameJsPath);
+      }
+      const expandBtn = document.getElementById('code-expand-btn');
+      const container = document.querySelector('.container');
+      if (expandBtn && container) {
+        expandBtn.addEventListener('click', () => {
+          container.classList.toggle('code-expanded');
+          const isExpanded = container.classList.contains('code-expanded');
+          expandBtn.textContent = isExpanded ? 'Réduire' : 'Agrandir';
+          expandBtn.title = isExpanded ? 'Réduire le panneau code' : 'Agrandir le panneau code';
+          if (window.terminal) {
+            setTimeout(() => window.terminal.resizeEditor(), 0);
+          }
+        });
       }
     });
   </script>

@@ -114,6 +114,16 @@ class Terminal {
     this.loadGameCode();
   }
 
+  /**
+   * Rafraîchit l'éditeur CodeMirror (recalcul de la hauteur).
+   * Utile après un changement de taille du panneau (ex. expand/collapse).
+   */
+  resizeEditor() {
+    if (this.editor && typeof this.editor.refresh === 'function') {
+      this.editor.refresh();
+    }
+  }
+
   async loadGameCode() {
     try {
       // Chercher une balise script avec id="game-code" dans le DOM
